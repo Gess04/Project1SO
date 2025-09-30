@@ -14,7 +14,8 @@ public class Process extends Thread {
     public enum Status {
         Running,
         Blocked,
-        Ready
+        Ready,
+        Exit
     }
 
     private Integer ID;
@@ -48,7 +49,7 @@ public class Process extends Thread {
         this.priority = priority;
         this.mutex = mutex;
         this.arrivaltime = arrivaltime;
-        this.responseRatio = 0;
+        this.responseRatio = 0.0;
     }
 
     public Integer getID() {
@@ -81,6 +82,10 @@ public class Process extends Thread {
 
     public void setRemainingBurstTime(Integer remainingBurstTime) {
         this.remainingBurstTime = remainingBurstTime;
+    }
+    
+    public void decreaseRemainingBurstTime(Integer count) {
+        this.remainingBurstTime = count - 1;
     }
 
     public boolean isCPUbound() {
@@ -115,13 +120,14 @@ public class Process extends Thread {
         this.cyclesToCompleteRequest = cyclesToCompleteRequest;
     }
 
-//    public String getStatus() {
-//        return status;
-//    }
-//
-//    public void setStatus(String status) {
-//        this.status = status;
-//    }
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+  
 
     public Integer getPC() {
         return PC;
@@ -138,8 +144,6 @@ public class Process extends Thread {
     public void setMAR(Integer MAR) {
         this.MAR = MAR;
     }
-
-
 
     public Semaphore getMutex() {
         return mutex;
@@ -164,20 +168,5 @@ public class Process extends Thread {
     public void setResponseRatio(double responseRatio) {
         this.responseRatio = responseRatio;
     }
-
-    /**
-     * @return the status
-     */
-    public Status getStatus() {
-        return status;
-    }
-
-    /**
-     * @param status the status to set
-     */
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-  
     
 }
