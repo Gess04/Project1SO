@@ -10,16 +10,23 @@ import java.util.concurrent.Semaphore;
  * @author Gabriel Flores
  */
 public class Process extends Thread {
+    
+    public enum Status {
+        Running,
+        Blocked,
+        Ready,
+        Exit
+    }
 
     private Integer ID;
     private String processName;
     private Integer instructionCount;
-    private Integer raminingBurstTime;
+    private Integer remainingBurstTime;
     private boolean CPUbound;
     private boolean IObound;
     private Integer cyclesToExcept;
     private Integer cyclesToCompleteRequest;
-    private String status;
+    private Status status;
     private Integer PC;
     private Integer MAR;
     private Integer priority;
@@ -27,22 +34,22 @@ public class Process extends Thread {
     private int arrivaltime;
     private double responseRatio;
     
-    public Process(int ID, String processName, int instructionCount, Integer raminingBurstTime, boolean CPUbound, boolean IObound, Integer cyclesToExcept, Integer cyclesToCompleteRequest, String status, Integer PC, Integer MAR, Integer priority, Semaphore mutex, int arrivaltime, double responseRatio) {
+    public Process(int ID, String processName, int instructionCount, Integer remainingBurstTime, boolean CPUbound, boolean IObound, Integer cyclesToExcept, Integer cyclesToCompleteRequest, Status status, Integer PC, Integer MAR, Integer priority, Semaphore mutex, int arrivaltime, double responseRatio) {
         this.ID = ID;
         this.processName = processName;
         this.instructionCount = instructionCount;
-        this.raminingBurstTime = raminingBurstTime;
+        this.remainingBurstTime = remainingBurstTime;
         this.CPUbound = CPUbound;
         this.IObound = IObound;
         this.cyclesToExcept = cyclesToExcept;
         this.cyclesToCompleteRequest = cyclesToCompleteRequest;
-        this.status = "Ready";
+        this.status = Status.Ready;
         this.PC = 0;
         this.MAR = 0;
         this.priority = priority;
         this.mutex = mutex;
         this.arrivaltime = arrivaltime;
-        this.responseRatio = 0;
+        this.responseRatio = 0.0;
     }
 
     public Integer getID() {
@@ -69,12 +76,16 @@ public class Process extends Thread {
         this.instructionCount = instructionCount;
     }
 
-    public Integer getRaminingBurstTime() {
-        return raminingBurstTime;
+    public Integer getRemainingBurstTime() {
+        return remainingBurstTime;
     }
 
-    public void setRaminingBurstTime(Integer raminingBurstTime) {
-        this.raminingBurstTime = raminingBurstTime;
+    public void setRemainingBurstTime(Integer remainingBurstTime) {
+        this.remainingBurstTime = remainingBurstTime;
+    }
+    
+    public void decreaseRemainingBurstTime(Integer count) {
+        this.remainingBurstTime = count - 1;
     }
 
     public boolean isCPUbound() {
@@ -109,13 +120,14 @@ public class Process extends Thread {
         this.cyclesToCompleteRequest = cyclesToCompleteRequest;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
+  
 
     public Integer getPC() {
         return PC;
@@ -132,8 +144,6 @@ public class Process extends Thread {
     public void setMAR(Integer MAR) {
         this.MAR = MAR;
     }
-
-
 
     public Semaphore getMutex() {
         return mutex;
@@ -158,6 +168,5 @@ public class Process extends Thread {
     public void setResponseRatio(double responseRatio) {
         this.responseRatio = responseRatio;
     }
-  
     
 }

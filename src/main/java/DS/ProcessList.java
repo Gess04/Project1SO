@@ -29,8 +29,8 @@ public class ProcessList {
         
     }
     
-    public boolean isEmpty() {
-        return size == 0;
+    public boolean isEmpty(){
+        return this.head == null;
     }
     
     public int getSize() {
@@ -38,7 +38,7 @@ public class ProcessList {
     }
     
     public void add(Process process){
-        Node newNode = new Node (process);
+        Node newNode = new Node(process);
         if (isEmpty()){
             head = newNode;
             tail = newNode;
@@ -49,7 +49,7 @@ public class ProcessList {
         size++;
     }
     
-    public void remove (int index) {
+    public void remove(int index) {
         if (index < 0 || index >= size) {
             throw new IndexOutOfBoundsException("Index out of range");
         }
@@ -68,5 +68,35 @@ public class ProcessList {
                 tail = current;
             }
         }
+        size--;
+    }
+    
+    public Process get(int index) {
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException("Index out of range");
+        }
+        Node current = head;
+        for (int i = 0; i < index; i++) {
+            current = current.next;
+        }
+        return current.data;
+    }
+    
+    public void show() {
+        if(!isEmpty()){
+            Node current = head;
+            while(current != null){
+            System.out.println("["+current.data+"]");
+            current = current.next;
+            }
+        }else{
+            System.out.println("No hay procesos en lista");
+        }
+    }
+        
+    public void clear(){
+        head = null;
+        tail = null;
+        size = 0;
     }
 }
