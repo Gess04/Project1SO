@@ -4,10 +4,102 @@
  */
 package CPU;
 
+import Clock.ClockManager;
+import DS.ProcessList;
+import DS.Queue;
+import Process.Process;
+import Scheduler.Scheduler;
+
 /**
  *
  * @author Gabriel Flores
  */
 public class CPU {
+    private Integer ID;
+    private String runningProcess;
+    private Integer PC;
+    private Integer MAR;
+    private Process process;
+    private Scheduler scheduler;
+    private ClockManager clockManager;
+    private Queue readyQueue;
+    private Queue blockedQueue;
+    private ProcessList exitList;
+    private String processName;
+
+    public CPU(Integer ID, String runningProcess, Integer PC, Integer MAR, Process process, ClockManager clockManager, Queue readyQueue, Queue blockedQueue, ProcessList exitList, String processName) {
+        this.ID = ID;
+        this.runningProcess = "OS";
+        this.PC = 0;
+        this.MAR = 0;
+        this.process = process;
+        this.clockManager = clockManager;
+        this.readyQueue = readyQueue;
+        this.blockedQueue = blockedQueue;
+        this.exitList = exitList;
+        this.processName = "";
+    }
+
+    public String getRunningProcess() {
+        return runningProcess;
+    }
+
+    public void setRunningProcess(String runningProcess) {
+        this.runningProcess = runningProcess;
+    }
+
+    public Integer getPC() {
+        return PC;
+    }
+
+    public void setPC(Integer PC) {
+        this.PC = PC;
+    }
+
+    public Integer getMAR() {
+        return MAR;
+    }
+
+    public void setMAR(Integer MAR) {
+        this.MAR = MAR;
+    }
+
+    public Integer getID() {
+        return ID;
+    }
+
+    public void setID(Integer ID) {
+        this.ID = ID;
+    }
+
+    public Process getProcess() {
+        return process;
+    }
+
+    public void setProcess(Process process) {
+        this.process = process;
+    }
+
+    public String getProcessName() {
+        return processName;
+    }
+
+    public void setProcessName(String processName) {
+        this.processName = processName;
+    }
+    
+    public void run (Process process) {
+        setProcess(process);
+        setProcessName(process.getProcessName());
+        setRunningProcess("p"+process.getID());
+        new Thread(() -> {
+            int startCycle = clockManager.getClockCycles();
+            int targetCycle;
+        }
+        );
+    }
+    
+    
+    
     
 }

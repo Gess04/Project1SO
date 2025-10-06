@@ -169,4 +169,25 @@ public class Process extends Thread {
         this.responseRatio = responseRatio;
     }
     
+    public void printProcessDetails() {
+        System.out.println("Process ID:" + ID);
+        System.out.println("Name:" + processName);
+        System.out.println("Instruction Count:" + instructionCount);
+        System.out.println("Remaining Burst time:" + remainingBurstTime);
+        System.out.println("CPU Bound:" + CPUbound);
+        System.out.println("I/O Bound:" + IObound);
+        System.out.println("# Cycles for exception:" + cyclesToExcept);
+        System.out.println("# Cycles to complete the request:" + cyclesToCompleteRequest);
+        System.out.println("Status:" + status);
+        System.out.println("Program Counter (PC):" + PC);
+        System.out.println("Memory Address Register (MAR):" + MAR);
+    }
+
+    @Override
+    public String toString() {
+        return "Process{" + "processName=" + processName + ", instructionCount=" + instructionCount + '}';
+    }
+    
+    
+    
 }

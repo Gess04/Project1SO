@@ -4,10 +4,60 @@
  */
 package Settings;
 
+import Clock.ClockManager;
+
 /**
  *
- * @author 58414
+ * @author Gabriel Flores
  */
 public class Settings {
+    private int CPUs;
+    private double instructionDuration;
+    private String planningAlgorithm;
+    private ClockManager clockManager;
+
+    public Settings(int CPUs, double instructionDuration, String planningAlgorithm, ClockManager clockManager) {
+        this.CPUs = CPUs;
+        this.instructionDuration = instructionDuration;
+        this.planningAlgorithm = planningAlgorithm;
+        this.clockManager = clockManager;
+    }
+
+    public int getCPUs() {
+        return CPUs;
+    }
+
+    public void setCPUs(int CPUs) {
+        this.CPUs = CPUs;
+    }
+
+    public double getInstructionDuration() {
+        return instructionDuration;
+    }
+
+    public void setInstructionDuration(double instructionDuration) {
+        this.instructionDuration = instructionDuration;
+    }
+
+    public String getPlanningAlgorithm() {
+        return planningAlgorithm;
+    }
+
+    public void setPlanningAlgorithm(String planningAlgorithm) {
+        this.planningAlgorithm = planningAlgorithm;
+    }
+
+    public ClockManager getClockManager() {
+        return clockManager;
+    }
+
+    public void setClockManager(ClockManager clockManager) {
+        this.clockManager = clockManager;
+    }
     
+    public void printSettings(){
+        System.out.println("CPUs:"+CPUs);
+        System.out.println("Instruction Duration:" + instructionDuration);
+        System.out.println("Planning Algorithm:" + planningAlgorithm);
+    }
 }

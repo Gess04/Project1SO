@@ -4,10 +4,16 @@
  */
 package Scheduler;
 
+import CPU.CPU;
+import DS.Queue;
+import Process.Process;
+
 /**
  *
- * @author tomasaraujo
+ * @author tomasaraujo y Gabriel Flores
  */
 public class Scheduler {
+    private Queue<Process> readyQueue;
+    private SchedulingAlgorithm algorithm;
     
 }
