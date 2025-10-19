@@ -8,6 +8,6 @@ package Scheduler;
  *
  * @author tomasaraujo
  */
-public class SRT {
+public class SJF {
     
 }

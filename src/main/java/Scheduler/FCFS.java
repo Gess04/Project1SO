@@ -14,5 +14,23 @@ import Process.Process;
  * @author tomasaraujo
  */
 public class FCFS {
+    private Queue readyQueue;
+    
+    public FCFS (Queue readyQueue){
+        this.readyQueue=readyQueue;
+    }
+    
+    public void dispatch (CPU cpu){
+        cpu.run((Process) readyQueue.dequeue());
+    }
+
+    public Queue getReadyQueue() {
+        return readyQueue;
+    }
+
+    public void setReadyQueue(Queue readyQueue) {
+        this.readyQueue = readyQueue;
+    }
+    
     
 }
