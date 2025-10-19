@@ -4,6 +4,11 @@
  */
 package Scheduler;
 
+
+import CPU.CPU;
+import DS.Queue;
+import Process.Process;
+
 /**
  *
  * @author tomasaraujo

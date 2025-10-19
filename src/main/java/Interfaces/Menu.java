@@ -4,16 +4,46 @@
  */
 package Interfaces;
 
+import CPU.CPU;
+import Clock.ClockManager;
+import Scheduler.Scheduler;
+import Settings.Settings;
+import DS.Queue;
+import DS.ProcessList;
+import javax.swing.* ;
+import Scheduler.Scheduler;
+
 /**
  *
- * @author 58414
+ * @author Gabriel Flores
  */
 public class Menu extends javax.swing.JFrame {
-
+    private static Queue readyQueue;
+    private static Queue blockedQueue;
+    private static ProcessList exitList;
+    private static Settings settings;
+    private static CPU[] cpus;
+    private ExecutionWindow executionWindow;
+    private CreateProcess createProcess;
+    private SettingsGUI settingsGUI;
+    private static Scheduler scheduler;
+    private static ClockManager clockManager;
     /**
      * Creates new form Menu
      */
-    public Menu() {
+    public Menu(Queue readyQueue,Queue blockedQueue,ProcessList exitList, Settings settings, CPU[] cpus, Scheduler scheduler, ClockManager clockManager) {
+        this.readyQueue=readyQueue;
+        this.blockedQueue=blockedQueue;
+        this.exitList=exitList;
+        this.settings=settings;
+        this.cpus=cpus;
+        this.scheduler=scheduler;
+        this.clockManager=clockManager;
+        
+   
+        
+
+        
         initComponents();
     }
 
@@ -27,22 +57,32 @@ public class Menu extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel2 = new javax.swing.JPanel();
-        jButton2 = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        executionButton = new javax.swing.JButton();
+        processButton = new javax.swing.JButton();
+        settingsButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jButton2.setText("Execution Window");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        executionButton.setText("Execution Window");
+        executionButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                executionButtonActionPerformed(evt);
             }
         });
 
-        jButton1.setText("Create process");
+        processButton.setText("Create process");
+        processButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                processButtonActionPerformed(evt);
+            }
+        });
 
-        jButton3.setText("Settings");
+        settingsButton.setText("Settings");
+        settingsButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                settingsButtonActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -50,26 +90,26 @@ public class Menu extends javax.swing.JFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(286, 286, 286)
-                .addComponent(jButton1)
+                .addComponent(processButton)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addContainerGap(274, Short.MAX_VALUE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton2)
+                    .addComponent(executionButton)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGap(30, 30, 30)
-                        .addComponent(jButton3)))
+                        .addComponent(settingsButton)))
                 .addGap(278, 278, 278))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(128, 128, 128)
-                .addComponent(jButton2)
+                .addComponent(executionButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jButton1)
+                .addComponent(processButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jButton3)
+                .addComponent(settingsButton)
                 .addContainerGap(242, Short.MAX_VALUE))
         );
 
@@ -91,9 +131,17 @@ public class Menu extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton2ActionPerformed
+    private void executionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_executionButtonActionPerformed
+        executionWindow.setVisible(true);
+    }//GEN-LAST:event_executionButtonActionPerformed
+
+    private void settingsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_settingsButtonActionPerformed
+        settingsGUI.setVisible(true);
+    }//GEN-LAST:event_settingsButtonActionPerformed
+
+    private void processButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_processButtonActionPerformed
+        createProcess.setVisible(true);
+    }//GEN-LAST:event_processButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -125,15 +173,15 @@ public class Menu extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Menu().setVisible(true);
+                new Menu(readyQueue, blockedQueue, exitList, settings,cpus,scheduler, clockManager).setVisible(true);
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
+    private javax.swing.JButton executionButton;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JButton processButton;
+    private javax.swing.JButton settingsButton;
     // End of variables declaration//GEN-END:variables
 }
