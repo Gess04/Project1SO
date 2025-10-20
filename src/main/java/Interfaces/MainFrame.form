@@ -108,7 +108,7 @@
                                       <Component id="jPanel17" min="-2" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
-                              <EmptySpace min="-2" pref="80" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="72" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Component id="jScrollPane1" max="32767" attributes="0"/>
                                   <Component id="jScrollPane2" max="32767" attributes="0"/>
@@ -179,7 +179,7 @@
                                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
                                       <Component id="types1" alignment="0" min="-2" max="-2" attributes="0"/>
                                       <Component id="cycles3" alignment="0" pref="216" max="32767" attributes="0"/>
-                                      <Component id="amountExceptions1" alignment="0" max="32767" attributes="0"/>
+                                      <Component id="instructionsCount1" alignment="0" max="32767" attributes="0"/>
                                       <Component id="cycles4" alignment="0" max="32767" attributes="0"/>
                                   </Group>
                                   <EmptySpace min="-2" pref="126" max="-2" attributes="0"/>
@@ -220,7 +220,7 @@
                                   </Group>
                                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="3" attributes="0">
-                                      <Component id="amountExceptions1" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="instructionsCount1" alignment="3" min="-2" max="-2" attributes="0"/>
                                       <Component id="jLabel6" alignment="3" min="-2" max="-2" attributes="0"/>
                                   </Group>
                                   <EmptySpace max="-2" attributes="0"/>
@@ -248,7 +248,7 @@
                             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="nameProccess1ActionPerformed"/>
                           </Events>
                         </Component>
-                        <Component class="javax.swing.JSpinner" name="amountExceptions1">
+                        <Component class="javax.swing.JSpinner" name="instructionsCount1">
                         </Component>
                         <Component class="javax.swing.JComboBox" name="types1">
                           <Properties>
