@@ -84,8 +84,8 @@ public class Process extends Thread {
         this.remainingBurstTime = remainingBurstTime;
     }
     
-    public void decreaseRemainingBurstTime(Integer count) {
-        this.remainingBurstTime = count - 1;
+    public void decreaseRemainingBurstTime() {
+        this.remainingBurstTime--;
     }
 
     public boolean isCPUbound() {

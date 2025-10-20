@@ -23,9 +23,9 @@ public class Menu extends javax.swing.JFrame {
     private static ProcessList exitList;
     private static Settings settings;
     private static CPU[] cpus;
-    private ExecutionWindow executionWindow;
-    private CreateProcess createProcess;
-    private SettingsGUI settingsGUI;
+//    private ExecutionWindow executionWindow;
+//    private CreateProcess createProcess;
+//    private SettingsGUI settingsGUI;
     private static Scheduler scheduler;
     private static ClockManager clockManager;
     /**
@@ -132,15 +132,15 @@ public class Menu extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void executionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_executionButtonActionPerformed
-        executionWindow.setVisible(true);
+//        executionWindow.setVisible(true);
     }//GEN-LAST:event_executionButtonActionPerformed
 
     private void settingsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_settingsButtonActionPerformed
-        settingsGUI.setVisible(true);
+//        settingsGUI.setVisible(true);
     }//GEN-LAST:event_settingsButtonActionPerformed
 
     private void processButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_processButtonActionPerformed
-        createProcess.setVisible(true);
+//        createProcess.setVisible(true);
     }//GEN-LAST:event_processButtonActionPerformed
 
     /**

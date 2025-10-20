@@ -4,12 +4,13 @@
  */
 package Interfaces;
 
+import Process.Process;
 import CPU.CPU;
-import Clock.ClockManager;
 import Scheduler.Scheduler;
 import Settings.Settings;
 import DS.Queue;
 import DS.ProcessList;
+import Clock.ClockManager;
 import javax.swing.* ;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
@@ -22,9 +23,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Gabriel Flores
  */
 public class MainFrame extends javax.swing.JFrame {
-    private static Queue readyQueue;
-    private static Queue blockedQueue;
-    private static ProcessList exitList;
+    private static Queue readyQueue = new Queue();
+    private static Queue blockedQueue = new Queue();
+    private static ProcessList exitList =  new ProcessList();
     private static Settings settings;
     private static CPU[] cpus;
     private static Scheduler scheduler;
@@ -35,6 +36,11 @@ public class MainFrame extends javax.swing.JFrame {
     private final JPanel finishedPanel;
     private final JLabel clockLabel;
     private final AtomicInteger nextId = new AtomicInteger(1);
+    private static final String CPU_BOUND = "CPU bound";
+    private static final String IO_BOUND  = "I/O bound";
+    private Timer uiClockTimer;
+    private Timer uiListsTimer;
+    private JLabel clockValue;
 
     public MainFrame() {
      
@@ -184,6 +190,46 @@ public class MainFrame extends javax.swing.JFrame {
             readyPanel.repaint();
         });
         initComponents();
+        
+        // Reloj Global
+        clockManager = new ClockManager(1);
+        
+        // Panel “Ciclo de reloj”
+//        jPanel17.setLayout(new BorderLayout());
+//        clockValue = new JLabel("0", SwingConstants.CENTER);
+//        clockValue.setFont(clockValue.getFont().deriveFont(36f));
+//        jPanel17.add(clockValue, BorderLayout.CENTER);
+        jPanel17.setLayout(new GridBagLayout());
+        jPanel17.setPreferredSize(new Dimension(200, 120)); // tamaño fijo
+
+        clockValue = new JLabel("0", SwingConstants.CENTER);
+        clockValue.setFont(new Font("SansSerif", Font.BOLD, 40));
+        clockValue.setOpaque(true);
+        clockValue.setBackground(new Color(240, 240, 240));
+        clockValue.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+        clockValue.setPreferredSize(new Dimension(120, 70)); // tamaño fijo del cuadro
+        clockValue.setHorizontalAlignment(SwingConstants.CENTER);
+        clockValue.setVerticalAlignment(SwingConstants.CENTER);
+        jPanel17.add(clockValue);
+        uiClockTimer = new Timer(200, e -> clockValue.setText(String.valueOf(clockManager.getClockCycles())));
+        uiClockTimer.start();
+        
+        uiListsTimer = new Timer(300, e -> {
+            refreshReadyPanel();
+            refreshBlockedPanel();
+            refreshFinishedPanel();
+        });
+        uiListsTimer.start();
+        
+        
+        types1.addActionListener(evt -> {
+            boolean isIO = IO_BOUND.equals(types1.getSelectedItem());
+            cycles3.setEnabled(isIO);
+            cycles4.setEnabled(isIO);
+        });
+        types1.setSelectedItem(CPU_BOUND);
+        cycles3.setEnabled(false);
+        cycles4.setEnabled(false);
     }
 
     private JPanel createCpuPanel(String title) {
@@ -246,7 +292,7 @@ public class MainFrame extends javax.swing.JFrame {
         jPanel14 = new javax.swing.JPanel();
         jPanel15 = new javax.swing.JPanel();
         nameProccess1 = new javax.swing.JTextField();
-        amountExceptions1 = new javax.swing.JSpinner();
+        instructionsCount1 = new javax.swing.JSpinner();
         types1 = new javax.swing.JComboBox<>();
         cycles3 = new javax.swing.JSpinner();
         cycles4 = new javax.swing.JSpinner();
@@ -319,7 +365,7 @@ public class MainFrame extends javax.swing.JFrame {
                 .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(types1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cycles3, javax.swing.GroupLayout.DEFAULT_SIZE, 216, Short.MAX_VALUE)
-                    .addComponent(amountExceptions1)
+                    .addComponent(instructionsCount1)
                     .addComponent(cycles4))
                 .addGap(126, 126, 126))
             .addGroup(jPanel15Layout.createSequentialGroup()
@@ -350,7 +396,7 @@ public class MainFrame extends javax.swing.JFrame {
                     .addComponent(jLabel5))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(amountExceptions1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(instructionsCount1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel6))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -491,7 +537,7 @@ public class MainFrame extends javax.swing.JFrame {
                     .addGroup(jPanel14Layout.createSequentialGroup()
                         .addGap(19, 19, 19)
                         .addComponent(jPanel17, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(80, 80, 80)
+                .addGap(72, 72, 72)
                 .addGroup(jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1)
                     .addComponent(jScrollPane2)
@@ -722,29 +768,28 @@ public class MainFrame extends javax.swing.JFrame {
     private void ChangesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ChangesActionPerformed
         String executionTime1 = jSpinner1.getValue().toString();
         String monoprocesor = (String) jComboBox2.getSelectedItem();
-        
+
         try {
-    int value = (Integer) jSpinner1.getValue();
-    
-    if (value <= 0) {
-        JOptionPane.showMessageDialog(this, 
-            "Error: El valor debe ser mayor que 0", 
-            "Valor inválido", 
-            JOptionPane.ERROR_MESSAGE);
-        jSpinner1.setValue(0); // Restablecer a valor por defecto
-        return; // Salir del método
-    }
-    
-    // Si el valor es válido (> 0), continuar con tu código aquí
-    // executionTime = valor; o lo que necesites hacer
-    
-} catch (Exception e) {
-    JOptionPane.showMessageDialog(this, 
-        "Error: Valor no válido en el spinner", 
-        "Error", 
-        JOptionPane.ERROR_MESSAGE);
-    jSpinner1.setValue(0); // Restablecer a valor por defecto
-    return; // Salir del método
+            int value = (Integer) jSpinner1.getValue();
+
+            if (value <= 0) {
+                JOptionPane.showMessageDialog(this,
+                        "Error: El valor debe ser mayor que 0",
+                        "Valor inválido",
+                        JOptionPane.ERROR_MESSAGE);
+                jSpinner1.setValue(0); // Restablecer a valor por defecto
+                return; // Salir del método
+            }
+
+            // Si el valor es válido (> 0), continuar con tu código aquí
+            // executionTime = valor; o lo que necesites hacer
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error: Valor no válido en el spinner",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            jSpinner1.setValue(0); // Restablecer a valor por defecto
+            return; // Salir del método
 }
          
     }//GEN-LAST:event_ChangesActionPerformed
@@ -754,37 +799,118 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jComboBox3ActionPerformed
 
     private void createProcessActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createProcessActionPerformed
-        String  cycles = cycles3.getValue().toString();
-        String cycles1 = cycles4.getValue().toString();
-        String instruction = amountExceptions1.getValue().toString();
-        String monoprocesor = (String) jComboBox2.getSelectedItem();
-        
-        try {
-    int value1 = (Integer) amountExceptions1.getValue();
-    int value2 = (Integer) cycles3.getValue();
-    int value3 =(Integer) cycles4.getValue();
-    
-    if (value1 <= 0 | value2 <= 0 | value3 <= 0) {
-        JOptionPane.showMessageDialog(this, 
-            "Error: El valor debe ser mayor que 0", 
-            "Valor inválido", 
-            JOptionPane.ERROR_MESSAGE);
-        jSpinner1.setValue(0); // Restablecer a valor por defecto
-        return; // Salir del método
-    }
-    
-    // Si el valor es válido (> 0), continuar con tu código aquí
-    // executionTime = valor; o lo que necesites hacer
-    
-} catch (Exception e) {
-    JOptionPane.showMessageDialog(this, 
-        "Error: Valor no válido en el spinner", 
-        "Error", 
-        JOptionPane.ERROR_MESSAGE);
-    jSpinner1.setValue(0); // Restablecer a valor por defecto
-    return; // Salir del método
-}
+
+        int pID = nextId.getAndIncrement();
+        String name = nameProccess1.getText();
+        if (name.isEmpty()) {
+            // Validación para que el nombre no sea vacío.
+            javax.swing.JOptionPane.showMessageDialog(this, "Ingresa un nombre.");
+            return;
+        }
+
+        Integer instructionCount = ((Number) instructionsCount1.getValue()).intValue();
+        String type = (String) types1.getSelectedItem();
+        Integer cyclesToExcept = ((Number) cycles3.getValue()).intValue();
+        Integer cyclesToCompleteRequest = ((Number) cycles4.getValue()).intValue();
+
+        boolean isIO = IO_BOUND.equals(type);
+        if (isIO) {
+            if (cyclesToExcept <= 0) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Para I/O-bound, 'ciclos para generar E/S' debe ser > 0.");
+                return;
+            }
+            if (cyclesToCompleteRequest < 0) {
+                javax.swing.JOptionPane.showMessageDialog(this, "La duración de E/S no puede ser negativa.");
+                return;
+            }
+        } else {
+            cyclesToExcept = 0;
+            cyclesToCompleteRequest = 0;
+        }
+
+        boolean CPUbound = !isIO;
+        boolean IObound = isIO;
+        int arrivalTime = clockManager.getClockCycles();
+
+        Process process = new Process(
+                pID, name,
+                instructionCount, instructionCount,
+                CPUbound, IObound,
+                cyclesToExcept, cyclesToCompleteRequest,
+                Process.Status.Ready,
+                0, 0,
+                0,
+                null,
+                arrivalTime,
+                0.0);
+        process.start();
+        readyQueue.enqueue(process);
+        // Print para comprobar que se están agregando a la cola.
+        System.out.println(readyQueue.getAllElements());
+        refreshReadyPanel();
+
+        nameProccess1.setText("");
+        instructionsCount1.setValue(1);
+        types1.setSelectedItem(CPU_BOUND);
+        cycles3.setValue(1);
+        cycles4.setValue(1);
+        cycles3.setEnabled(false);
+        cycles4.setEnabled(false);
     }//GEN-LAST:event_createProcessActionPerformed
+    
+    private void refreshReadyPanel() {
+        renderProcessesInto(jPanel5, (Process[]) readyQueue.getAllElements());
+    }
+
+    private void refreshBlockedPanel() {
+        renderProcessesInto(jPanel8, (Process[]) blockedQueue.getAllElements());
+    }
+
+    private void refreshFinishedPanel() {
+//        renderProcessesInto(jPanel10, exitList.get);
+    }
+
+    private void renderProcessesInto(JPanel container, Process[] processes) {
+        container.removeAll();
+        container.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        if (processes == null || processes.length == 0) {
+            container.add(new JLabel("Vacío"));
+        } else {
+            for (Process p : processes) {
+                container.add(makeCard(p));
+            }
+        }
+        container.revalidate();
+        container.repaint();
+    }
+
+    private JPanel makeCard(Process p) {
+        JPanel card = new JPanel();
+        card.setPreferredSize(new Dimension(160, 120));
+        card.setBackground(Color.WHITE);
+        card.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+
+        JLabel title = new JLabel(p.getProcessName(), SwingConstants.CENTER);
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        title.setFont(title.getFont().deriveFont(Font.BOLD, 13f));
+
+        JLabel id = new JLabel("ID: " + p.getID());
+        JLabel pc = new JLabel("PC: " + p.getPC());
+        JLabel mar = new JLabel("MAR: " + p.getMAR());
+        JLabel st = new JLabel("Estado: " + p.getStatus());
+        JLabel tp = new JLabel(p.isIObound() ? "Tipo: I/O bound" : "Tipo: CPU bound");
+
+        card.add(title);
+        card.add(Box.createVerticalStrut(6));
+        card.add(id);
+        card.add(pc);
+        card.add(mar);
+        card.add(st);
+        card.add(tp);
+
+        return card;
+    }
     
     /**
      * @param args the command line arguments
@@ -827,10 +953,10 @@ public class MainFrame extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton Changes;
     private javax.swing.JTabbedPane Simulador;
-    private javax.swing.JSpinner amountExceptions1;
     private javax.swing.JButton createProcess;
     private javax.swing.JSpinner cycles3;
     private javax.swing.JSpinner cycles4;
+    private javax.swing.JSpinner instructionsCount1;
     private javax.swing.JButton jButton4;
     private javax.swing.JComboBox<String> jComboBox2;
     private javax.swing.JComboBox<String> jComboBox3;

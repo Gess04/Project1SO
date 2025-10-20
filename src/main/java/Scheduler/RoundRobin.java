@@ -17,7 +17,7 @@ public class RoundRobin  {
     
 //Funcion del despachador la cual busca asignar un proceso a un CPU   
     public void dispatch (CPU cpu){
-        Queue<Process> readyQueue = cpu..getReadyQueue();  // Get the ready queue from Scheduler
+        Queue<Process> readyQueue = cpu.getReadyQueue();  // Get the ready queue from Scheduler
         System.out.println("Dispatching process...");  // Debug print
 
         if (!readyQueue.isEmpty()) {

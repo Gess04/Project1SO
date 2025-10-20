@@ -15,7 +15,6 @@ import Scheduler.Scheduler;
  * @author Gabriel Flores
  */
 public class CPU {
-    private Integer ID;
     private String runningProcess;
     private Integer PC;
     private Integer MAR;
@@ -27,8 +26,7 @@ public class CPU {
     private ProcessList exitList;
     private String processName;
 
-    public CPU(Integer ID, String runningProcess, Integer PC, Integer MAR, Process process, ClockManager clockManager, Queue readyQueue, Queue blockedQueue, ProcessList exitList, String processName) {
-        this.ID = ID;
+    public CPU(String runningProcess, Integer PC, Integer MAR, Process process, ClockManager clockManager, Queue readyQueue, Queue blockedQueue, ProcessList exitList, String processName) {
         this.runningProcess = "OS";
         this.PC = 0;
         this.MAR = 0;
@@ -64,14 +62,6 @@ public class CPU {
         this.MAR = MAR;
     }
 
-    public Integer getID() {
-        return ID;
-    }
-
-    public void setID(Integer ID) {
-        this.ID = ID;
-    }
-
     public Process getProcess() {
         return process;
     }
@@ -87,6 +77,15 @@ public class CPU {
     public void setProcessName(String processName) {
         this.processName = processName;
     }
+
+    public Queue getReadyQueue() {
+        return readyQueue;
+    }
+
+    public void setReadyQueue(Queue readyQueue) {
+        this.readyQueue = readyQueue;
+    }
+    
     
     public void run (Process process) {
         setProcess(process);
@@ -94,9 +93,8 @@ public class CPU {
         setRunningProcess("p"+process.getID());
         new Thread(() -> {
             int startCycle = clockManager.getClockCycles();
-            int targetCycle;
-        }
-        );
+            int targetCycle;    
+        }).start();
     }
     
     
