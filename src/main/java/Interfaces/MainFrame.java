@@ -119,6 +119,7 @@ public class MainFrame extends javax.swing.JFrame {
         JPanel readyContainer = new JPanel(new BorderLayout());
         readyContainer.setBorder(new TitledBorder("Cola de Listos:"));
         readyPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10)); // panel donde se añaden tarjetas
+        readyPanel.setMaximumSize(new Dimension(10,140));
         readyPanel.setBackground(new Color(245,245,245));
         JScrollPane readyScroll = new JScrollPane(readyPanel,
                 JScrollPane.VERTICAL_SCROLLBAR_NEVER,
@@ -195,13 +196,8 @@ public class MainFrame extends javax.swing.JFrame {
         clockManager = new ClockManager(1);
         
         // Panel “Ciclo de reloj”
-//        jPanel17.setLayout(new BorderLayout());
-//        clockValue = new JLabel("0", SwingConstants.CENTER);
-//        clockValue.setFont(clockValue.getFont().deriveFont(36f));
-//        jPanel17.add(clockValue, BorderLayout.CENTER);
         jPanel17.setLayout(new GridBagLayout());
         jPanel17.setPreferredSize(new Dimension(200, 120)); // tamaño fijo
-
         clockValue = new JLabel("0", SwingConstants.CENTER);
         clockValue.setFont(new Font("SansSerif", Font.BOLD, 40));
         clockValue.setOpaque(true);
@@ -268,7 +264,7 @@ public class MainFrame extends javax.swing.JFrame {
             
         }
     }
-
+    
     /**
      * Creates new form MainFrame
      */
@@ -301,6 +297,7 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         createProcess = new javax.swing.JButton();
+        completeExceptLabel = new javax.swing.JLabel();
         jPanel16 = new javax.swing.JPanel();
         jComboBox3 = new javax.swing.JComboBox<>();
         jButton4 = new javax.swing.JButton();
@@ -354,13 +351,20 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
 
+        completeExceptLabel.setText("jLabel1");
+
         javax.swing.GroupLayout jPanel15Layout = new javax.swing.GroupLayout(jPanel15);
         jPanel15.setLayout(jPanel15Layout);
         jPanel15Layout.setHorizontalGroup(
             jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel15Layout.createSequentialGroup()
-                .addGap(15, 15, 15)
-                .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel15Layout.createSequentialGroup()
+                        .addGap(15, 15, 15)
+                        .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel15Layout.createSequentialGroup()
+                        .addGap(34, 34, 34)
+                        .addComponent(completeExceptLabel)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(types1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -407,7 +411,9 @@ public class MainFrame extends javax.swing.JFrame {
                     .addComponent(cycles3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cycles4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cycles4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(completeExceptLabel))
                 .addGap(18, 18, 18)
                 .addComponent(createProcess)
                 .addContainerGap(18, Short.MAX_VALUE))
@@ -801,7 +807,7 @@ public class MainFrame extends javax.swing.JFrame {
     private void createProcessActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createProcessActionPerformed
 
         int pID = nextId.getAndIncrement();
-        String name = nameProccess1.getText();
+        String name = nameProccess1.getText().toUpperCase().strip();
         if (name.isEmpty()) {
             // Validación para que el nombre no sea vacío.
             javax.swing.JOptionPane.showMessageDialog(this, "Ingresa un nombre.");
@@ -809,6 +815,10 @@ public class MainFrame extends javax.swing.JFrame {
         }
 
         Integer instructionCount = ((Number) instructionsCount1.getValue()).intValue();
+        if (instructionCount < 0) {
+            javax.swing.JOptionPane.showMessageDialog(this, "La cantidad de instrucciones del proceso debe ser mayor de 0.");
+            return;
+        }
         String type = (String) types1.getSelectedItem();
         Integer cyclesToExcept = ((Number) cycles3.getValue()).intValue();
         Integer cyclesToCompleteRequest = ((Number) cycles4.getValue()).intValue();
@@ -953,6 +963,7 @@ public class MainFrame extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton Changes;
     private javax.swing.JTabbedPane Simulador;
+    private javax.swing.JLabel completeExceptLabel;
     private javax.swing.JButton createProcess;
     private javax.swing.JSpinner cycles3;
     private javax.swing.JSpinner cycles4;
