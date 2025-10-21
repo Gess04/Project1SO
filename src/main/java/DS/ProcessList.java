@@ -99,4 +99,15 @@ public class ProcessList {
         tail = null;
         size = 0;
     }
+    
+    public Process[] getAllProcesses() {
+        Process[] arr = new Process[size];
+        Node current = head;
+        int i = 0;
+        while (current != null) {
+            arr[i++] = current.data;
+            current = current.next;
+        }
+        return arr;
+    }
 }
