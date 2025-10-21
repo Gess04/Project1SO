@@ -5,6 +5,8 @@
 package Settings;
 
 import Clock.ClockManager;
+import java.io.*;
+import java.nio.file.*;
 
 /**
  *
@@ -17,10 +19,14 @@ public class Settings {
     private ClockManager clockManager;
 
     public Settings(int CPUs, double instructionDuration, String planningAlgorithm, ClockManager clockManager) {
-        this.CPUs = CPUs;
+        this.CPUs = 1;
         this.instructionDuration = instructionDuration;
         this.planningAlgorithm = planningAlgorithm;
         this.clockManager = clockManager;
+    }
+    
+    public Settings(double instructionDuration, String planningAlgorithm, ClockManager clockManager) {
+        this(1, instructionDuration, planningAlgorithm, clockManager); // Llama al constructor completo
     }
 
     public int getCPUs() {
@@ -60,4 +66,7 @@ public class Settings {
         System.out.println("Instruction Duration:" + instructionDuration);
         System.out.println("Planning Algorithm:" + planningAlgorithm);
     }
+    
+    
+   
 }

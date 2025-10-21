@@ -5,6 +5,7 @@
 
 package com.mycompany.project1.so;
 import Interfaces.MainFrame;
+import Settings.Settings;
 
 /**
  *
@@ -13,7 +14,9 @@ import Interfaces.MainFrame;
 public class Main {
 
     public static void main(String[] args) {
-       MainFrame app = new MainFrame();
-       app.setVisible(true);
+      
+        MainFrame app = new MainFrame();
+        app.setVisible(true);
+        
     }
 }
