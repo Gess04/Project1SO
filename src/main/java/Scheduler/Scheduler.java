@@ -35,6 +35,6 @@ public class Scheduler {
     public void dispatch(CPU cpu) {
         reorder();  // Reorder the queue before dispatching
         Process process = readyQueue.dequeue();  // Get the next process
-        cpu.run(process);  // Let the CPU execute the process
+//        cpu.run(process);  // Let the CPU execute the process
     }
 }
