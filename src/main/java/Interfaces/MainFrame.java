@@ -921,21 +921,7 @@ public class MainFrame extends javax.swing.JFrame {
             readyLock.release();              // LIBERA
         }
         refreshReadyPanel(); 
-        try {
-        // Obtener los valores del comboBox y otros campos
-        String executionALgorithm = (String) jComboBox3.getSelectedItem();
-
-        // Guardar configuración
-        this.settings.setPlanningAlgorithm(executionALgorithm);
         
-
-        // Mensaje de confirmación
-        JOptionPane.showMessageDialog(this, "✅ Configuración guardada exitosamente.");
-
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this, "❌ Error al guardar: " + e.getMessage());
-    }
-
         
     }//GEN-LAST:event_jButton4ActionPerformed
 
@@ -1175,16 +1161,19 @@ public class MainFrame extends javax.swing.JFrame {
         case "FCFS":
             scheduler = new Scheduler(new FCFS(readyQueue), readyQueue);
             System.out.println("Algoritmo cambiado a FCFS");
+            JOptionPane.showMessageDialog(this, "✅ Configuración guardada exitosamente.");
             break;
 
         case "SPN":
             scheduler = new Scheduler(new SPN(readyQueue), readyQueue);
             System.out.println("Algoritmo cambiado a SPN");
+            JOptionPane.showMessageDialog(this, "✅ Configuración guardada exitosamente.");
             break;
             
         case "SJF":
             scheduler = new Scheduler(new SRT(readyQueue), readyQueue);
             System.out.println("Algoritmo cambiado a SRT");
+            JOptionPane.showMessageDialog(this, "✅ Configuración guardada exitosamente.");
             break;
 
 //        case "RR":
@@ -1196,6 +1185,7 @@ public class MainFrame extends javax.swing.JFrame {
 
         default:
             System.out.println("Algoritmo no reconocido.");
+            JOptionPane.showMessageDialog(this, "❌ Error al guardar: ");
             break;
     }
 }
