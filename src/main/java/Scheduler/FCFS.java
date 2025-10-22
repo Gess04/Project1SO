@@ -13,17 +13,13 @@ import Process.Process;
  *
  * @author tomasaraujo
  */
-public class FCFS {
+public class FCFS implements SchedulingAlgorithm {
     private Queue readyQueue;
     
     public FCFS (Queue readyQueue){
         this.readyQueue=readyQueue;
     }
     
-    public void dispatch (CPU cpu){
-        cpu.run((Process) readyQueue.dequeue());
-    }
-
     public Queue getReadyQueue() {
         return readyQueue;
     }
@@ -32,5 +28,14 @@ public class FCFS {
         this.readyQueue = readyQueue;
     }
     
+    @Override
+    public void reorder() {
+        // do nothing
+    }
+    
+    @Override
+    public void dispatch(CPU cpu) {
+        // do nothing
+    }
     
 }

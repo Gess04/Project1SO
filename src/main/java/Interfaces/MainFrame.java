@@ -11,12 +11,13 @@ import Settings.Settings;
 import DS.Queue;
 import DS.ProcessList;
 import Clock.ClockManager;
+import Scheduler.*;
 import javax.swing.* ;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.Semaphore;
+import Interfaces.HelperFunctions;
 
 
 /**
@@ -31,6 +32,7 @@ public class MainFrame extends javax.swing.JFrame {
     private static CPU cpu;
     private static Scheduler scheduler;
     private static ClockManager clockManager;
+    private SchedulingAlgorithm algorithm;
     
     private final JPanel readyPanel;         // panel interno dentro del JScrollPane de Listos
     private final JPanel blockedPanel;
@@ -157,7 +159,6 @@ public class MainFrame extends javax.swing.JFrame {
         center.add(finishedContainer);  
           
         
-
         initComponents();
 
         
@@ -173,10 +174,15 @@ public class MainFrame extends javax.swing.JFrame {
         
         // Reloj Global
         clockManager = new ClockManager(1);
-        readyQueue   = new Queue();
-        blockedQueue = new Queue();
-        exitList = new ProcessList();
-
+       
+        // Timer que reordena la readyQueue periódicamente (no bloquea al CPU)
+        Timer reorderTimer = new Timer(120, e -> {
+            scheduler.dispatch(cpu);
+            scheduler.reorder();
+            refreshReadyPanel(); // para que veas el reorden en la UI
+        });
+        reorderTimer.start();
+        
         // CPU
         CPU cpu = new CPU(clockManager, readyQueue, blockedQueue, exitList,
                 readyLock, blockedLock, exitLock, ioDevice);
@@ -199,6 +205,7 @@ public class MainFrame extends javax.swing.JFrame {
         uiClockTimer.start();
         
         Timer uiListsTimer = new Timer(300, e -> {
+            scheduler.dispatch(cpu);
             refreshReadyPanel();
             refreshBlockedPanel();
             refreshFinishedPanel();
@@ -278,7 +285,7 @@ public class MainFrame extends javax.swing.JFrame {
         createProcess = new javax.swing.JButton();
         completeExceptLabel = new javax.swing.JLabel();
         jPanel16 = new javax.swing.JPanel();
-        jComboBox3 = new javax.swing.JComboBox<>();
+        planningAlgorithm = new javax.swing.JComboBox<>();
         jButton4 = new javax.swing.JButton();
         jPanel17 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -300,6 +307,7 @@ public class MainFrame extends javax.swing.JFrame {
         cpuMARLabel = new javax.swing.JLabel();
         cpuStaLabel = new javax.swing.JLabel();
         cpuTipoLabel = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jPanel6 = new javax.swing.JPanel();
         jComboBox2 = new javax.swing.JComboBox<>();
@@ -412,10 +420,10 @@ public class MainFrame extends javax.swing.JFrame {
 
         jPanel16.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Politicas de planificacion", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
 
-        jComboBox3.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Round robin", "FCFS", "Feedback", "HRRN", "SJF", "SPN", "Scheduler", " " }));
-        jComboBox3.addActionListener(new java.awt.event.ActionListener() {
+        planningAlgorithm.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Round robin", "FCFS", "Feedback", "HRRN", "SRT", "SPN"}));
+        planningAlgorithm.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jComboBox3ActionPerformed(evt);
+                planningAlgorithmActionPerformed(evt);
             }
         });
 
@@ -437,14 +445,14 @@ public class MainFrame extends javax.swing.JFrame {
                         .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(21, 21, 21))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel16Layout.createSequentialGroup()
-                        .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(planningAlgorithm, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(40, 40, 40))))
         );
         jPanel16Layout.setVerticalGroup(
             jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel16Layout.createSequentialGroup()
                 .addContainerGap(12, Short.MAX_VALUE)
-                .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(planningAlgorithm, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jButton4)
                 .addGap(25, 25, 25))
@@ -597,6 +605,13 @@ public class MainFrame extends javax.swing.JFrame {
                 .addContainerGap(16, Short.MAX_VALUE))
         );
 
+        jButton1.setText("Crear 10 procesos");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel14Layout = new javax.swing.GroupLayout(jPanel14);
         jPanel14.setLayout(jPanel14Layout);
         jPanel14Layout.setHorizontalGroup(
@@ -611,7 +626,10 @@ public class MainFrame extends javax.swing.JFrame {
                         .addComponent(jPanel16, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel14Layout.createSequentialGroup()
                         .addGap(19, 19, 19)
-                        .addComponent(jPanel17, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jPanel17, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel14Layout.createSequentialGroup()
+                        .addGap(107, 107, 107)
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(72, 72, 72)
                 .addGroup(jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 367, Short.MAX_VALUE)
@@ -639,7 +657,9 @@ public class MainFrame extends javax.swing.JFrame {
                         .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel14Layout.createSequentialGroup()
                         .addComponent(jPanel15, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(55, 55, 55)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton1)
+                        .addGap(26, 26, 26)
                         .addComponent(jPanel16, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(jPanel17, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -832,7 +852,19 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_types1ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        String executionALgorithm = (String) jComboBox3.getSelectedItem();
+
+        updateSchedulerAlgorithm();
+        try {
+            readyLock.acquire();              // BLOQUEA la cola mientras reordenas
+            if (scheduler != null) {
+                scheduler.reorder();          // reordena TODOS los que ya están en cola
+            }
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        } finally {
+            readyLock.release();              // LIBERA
+        }
+        refreshReadyPanel(); 
         
     }//GEN-LAST:event_jButton4ActionPerformed
 
@@ -869,9 +901,9 @@ public class MainFrame extends javax.swing.JFrame {
          
     }//GEN-LAST:event_ChangesActionPerformed
 
-    private void jComboBox3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox3ActionPerformed
+    private void planningAlgorithmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_planningAlgorithmActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jComboBox3ActionPerformed
+    }//GEN-LAST:event_planningAlgorithmActionPerformed
 
     private void createProcessActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createProcessActionPerformed
 
@@ -927,6 +959,7 @@ public class MainFrame extends javax.swing.JFrame {
         try {
             readyLock.acquire();
             readyQueue.enqueue(process);
+            if (scheduler != null) scheduler.reorder(); 
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
         } finally {
@@ -941,6 +974,40 @@ public class MainFrame extends javax.swing.JFrame {
         cycles3.setEnabled(false);
         cycles4.setEnabled(false);
     }//GEN-LAST:event_createProcessActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        for (int i=1; i<11; i++) {
+            int pId = i;
+            String name = "Proceso " + Integer.toString(i);
+            int instructionCount = 8;
+            boolean type = (i%2 == 0) ? true : false;
+            Integer cyclesToExcept = 0;
+            Integer cyclesToCompleteRequest = 0;
+            if (type) {
+                cyclesToExcept = 3;
+                cyclesToCompleteRequest = 2;
+            }
+            boolean CPUbound = !type;
+            boolean IObound = type;
+            int arrivalTime = clockManager.getClockCycles();
+            
+            Process process = new Process(pId, name, 
+                    instructionCount, instructionCount, 
+                    CPUbound, IObound, 
+                    cyclesToExcept, cyclesToCompleteRequest, 
+                    Process.Status.Ready, 0, 0, 0, null, arrivalTime, 0.0);
+            
+            try {
+                readyLock.acquire();
+                readyQueue.enqueue(process);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+            } finally {
+                readyLock.release();
+            }
+        }
+    }//GEN-LAST:event_jButton1ActionPerformed
     
     private void refreshReadyPanel() {
         try {
@@ -1020,6 +1087,40 @@ public class MainFrame extends javax.swing.JFrame {
         }
     }
     
+    private void updateSchedulerAlgorithm() {
+    String selected = (String) planningAlgorithm.getSelectedItem();
+
+    if (selected == null) return;
+
+    switch (selected) {
+        case "FCFS":
+            scheduler = new Scheduler(new FCFS(readyQueue), readyQueue);
+            System.out.println("Algoritmo cambiado a FCFS");
+            break;
+
+        case "SPN":
+            scheduler = new Scheduler(new SPN(readyQueue), readyQueue);
+            System.out.println("Algoritmo cambiado a SPN");
+            break;
+            
+        case "SJF":
+            scheduler = new Scheduler(new SRT(readyQueue), readyQueue);
+            System.out.println("Algoritmo cambiado a SRT");
+            break;
+
+//        case "RR":
+//            scheduler = new Scheduler(new RoundRobin(readyQueue, 3), readyQueue); // quantum=3 ejemplo
+//            System.out.println("Algoritmo cambiado a Round Robin");
+//            break;
+            
+            
+
+        default:
+            System.out.println("Algoritmo no reconocido.");
+            break;
+    }
+}
+    
     /**
      * @param args the command line arguments
      */
@@ -1078,9 +1179,9 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JSpinner cycles3;
     private javax.swing.JSpinner cycles4;
     private javax.swing.JSpinner instructionsCount1;
+    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton4;
     private javax.swing.JComboBox<String> jComboBox2;
-    private javax.swing.JComboBox<String> jComboBox3;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
@@ -1106,6 +1207,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JSpinner jSpinner1;
     private javax.swing.JTextField nameProccess1;
+    private javax.swing.JComboBox<String> planningAlgorithm;
     private javax.swing.JComboBox<String> types1;
     // End of variables declaration//GEN-END:variables
 }

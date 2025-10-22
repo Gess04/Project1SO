@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package Scheduler;
+import Process.Process;
 import DS.Queue;
 import CPU.CPU;
 
@@ -10,10 +11,10 @@ import CPU.CPU;
  *
  * @author tomasaraujo
  */
-public class HRRN implements SchedulingAlgorithm {
+public class SRT implements SchedulingAlgorithm{
     private Queue readyQueue;
     
-    public HRRN (Queue readyQueue) {
+    public SRT(Queue readyQueue) {
         this.readyQueue = readyQueue;
     }
     
@@ -26,5 +27,5 @@ public class HRRN implements SchedulingAlgorithm {
     public void dispatch(CPU cpu) {
         
     }
-    
+
 }

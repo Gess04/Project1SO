@@ -111,6 +111,10 @@
                                       <EmptySpace min="-2" pref="19" max="-2" attributes="0"/>
                                       <Component id="jPanel17" min="-2" max="-2" attributes="0"/>
                                   </Group>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <EmptySpace min="-2" pref="107" max="-2" attributes="0"/>
+                                      <Component id="jButton1" min="-2" pref="184" max="-2" attributes="0"/>
+                                  </Group>
                               </Group>
                               <EmptySpace min="-2" pref="72" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
@@ -146,7 +150,9 @@
                                   </Group>
                                   <Group type="102" alignment="0" attributes="0">
                                       <Component id="jPanel15" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace min="-2" pref="55" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="jButton1" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" pref="26" max="-2" attributes="0"/>
                                       <Component id="jPanel16" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace type="separate" max="-2" attributes="0"/>
                                       <Component id="jPanel17" min="-2" max="-2" attributes="0"/>
@@ -335,7 +341,7 @@
                                           <EmptySpace min="-2" pref="21" max="-2" attributes="0"/>
                                       </Group>
                                       <Group type="102" alignment="1" attributes="0">
-                                          <Component id="jComboBox3" min="-2" pref="118" max="-2" attributes="0"/>
+                                          <Component id="planningAlgorithm" min="-2" pref="118" max="-2" attributes="0"/>
                                           <EmptySpace min="-2" pref="40" max="-2" attributes="0"/>
                                       </Group>
                                   </Group>
@@ -346,7 +352,7 @@
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" alignment="0" attributes="0">
                                   <EmptySpace pref="12" max="32767" attributes="0"/>
-                                  <Component id="jComboBox3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="planningAlgorithm" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace type="separate" max="-2" attributes="0"/>
                                   <Component id="jButton4" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace min="-2" pref="25" max="-2" attributes="0"/>
@@ -355,23 +361,14 @@
                         </DimensionLayout>
                       </Layout>
                       <SubComponents>
-                        <Component class="javax.swing.JComboBox" name="jComboBox3">
+                        <Component class="javax.swing.JComboBox" name="planningAlgorithm">
                           <Properties>
-                            <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                              <StringArray count="8">
-                                <StringItem index="0" value="Round robin"/>
-                                <StringItem index="1" value="FCFS"/>
-                                <StringItem index="2" value="Feedback"/>
-                                <StringItem index="3" value="HRRN"/>
-                                <StringItem index="4" value="SJF"/>
-                                <StringItem index="5" value="SPN"/>
-                                <StringItem index="6" value="Scheduler"/>
-                                <StringItem index="7" value=" "/>
-                              </StringArray>
+                            <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                              <Connection code="new javax.swing.DefaultComboBoxModel&lt;&gt;(new String[] { &quot;Round robin&quot;, &quot;FCFS&quot;, &quot;Feedback&quot;, &quot;HRRN&quot;, &quot;SRT&quot;, &quot;SPN&quot;})" type="code"/>
                             </Property>
                           </Properties>
                           <Events>
-                            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jComboBox3ActionPerformed"/>
+                            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="planningAlgorithmActionPerformed"/>
                           </Events>
                           <AuxValues>
                             <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
@@ -656,6 +653,14 @@
                         </Component>
                       </SubComponents>
                     </Container>
+                    <Component class="javax.swing.JButton" name="jButton1">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Crear 10 procesos"/>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton1ActionPerformed"/>
+                      </Events>
+                    </Component>
                   </SubComponents>
                 </Container>
               </SubComponents>
