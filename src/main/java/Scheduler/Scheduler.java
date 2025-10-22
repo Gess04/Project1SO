@@ -15,7 +15,7 @@ import Process.Process;
 public class Scheduler {
     private Queue<Process> readyQueue;
     private SchedulingAlgorithm algorithm;
-     // Constructor now accepts the SchedulingAlgorithm and readyQueue
+    
     public Scheduler(SchedulingAlgorithm algorithm, Queue<Process> readyQueue) {
         this.algorithm = algorithm;
         this.readyQueue = readyQueue;
