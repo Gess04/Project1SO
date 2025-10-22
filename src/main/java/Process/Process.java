@@ -3,6 +3,15 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package Process;
+import Clock.ClockManager;
+import Settings.Settings;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -10,6 +19,10 @@ import java.util.concurrent.Semaphore;
  * @author Gabriel Flores
  */
 public class Process extends Thread {
+
+    public Process(String name, String instructionsCounter, String exceptionCycle) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
     
     public enum Status {
         Running,
@@ -51,6 +64,14 @@ public class Process extends Thread {
         this.arrivaltime = arrivaltime;
         this.responseRatio = 0.0;
     }
+
+    public Process(String processName, Integer instructionCount, Integer cyclesToExcept) {
+        this.processName = processName;
+        this.instructionCount = instructionCount;
+        this.cyclesToExcept = cyclesToExcept;
+    }
+    
+    
 
     public Integer getID() {
         return ID;
@@ -188,6 +209,37 @@ public class Process extends Thread {
         return "Process{" + "processName=" + processName + ", instructionCount=" + instructionCount + '}';
     }
     
+    public void saveToCSV() {
+    File file =new File("ExecutionAlgorithm.csv");
+    System.out.println("Guardando CSV en:" + file.getAbsolutePath());
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter("C:\\MiProyecto\\ExecutionAlgorithm.csv"))) {
+        bw.write("CPUs,InstructionDuration,Algorithm");
+        bw.newLine();
+        bw.write(this.processName+ "," + this.instructionCount+ "," + this.cyclesToExcept);
+        bw.newLine();
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
     
+     public static Settings loadFromCSV() {
+        try (BufferedReader br = new BufferedReader(new FileReader("ExecutionAlgorithm.csv"))) {
+            br.readLine(); // saltar encabezado
+            String line = br.readLine();
+            if (line != null) {
+                String[] values = line.split(",");
+                int cpus = Integer.parseInt(values[0]);
+                double duration = Double.parseDouble(values[1]);
+                String algorithm = values[2];
+                ClockManager clock = new ClockManager(duration);
+                
+                return new Settings(cpus, duration, algorithm,clock);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        ClockManager defaultClock = new ClockManager(1.0);
+        return new Settings(1, 1.0, "FCFS",defaultClock); // valores por defecto si no hay archivo
+    }
     
 }
