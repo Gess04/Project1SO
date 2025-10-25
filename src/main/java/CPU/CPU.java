@@ -36,7 +36,10 @@ public class CPU {
     private volatile boolean running = false;
     private Thread worker;
     private int lastCycleRef = 0;
-
+    
+    private volatile boolean preemptRequested = false;
+    private volatile Process preemptCandidate = null;
+    
     public CPU(ClockManager clockManager,
                Queue readyQueue, Queue blockedQueue, ProcessList exitList,
                Semaphore readyLock, Semaphore blockedLock, Semaphore exitLock,
@@ -289,7 +292,12 @@ public class CPU {
         setRunning(false);
         if (getWorker() != null) getWorker().interrupt();
     }
-
+    
+    public void requestPreemption(Process candidate) {
+        this.preemptCandidate = candidate;
+        this.preemptRequested = true;
+    }
+    
     private void run() {
         setLastCycleRef(getClockManager().getClockCycles());
         while (isRunning()) {
@@ -302,6 +310,36 @@ public class CPU {
                 }
 
                 if (getProcess() != null && now > getLastCycleRef()) {
+                    if (preemptRequested) {
+                        preemptRequested = false;
+                        try {
+                            getReadyLock().acquire();
+                            // Devuelve el proceso actual a la cola si aún no terminó
+                            if (process != null) {
+                                process.setStatus(Process.Status.Ready);
+                                readyQueue.enqueue(process);
+                            }
+
+                            // Carga el nuevo proceso corto o prioritario
+                            process = preemptCandidate;
+                            preemptCandidate = null;
+
+                            if (process != null) {
+                                process.setStatus(Process.Status.Running);
+                                setRunningProcess("P" + process.getID());
+                                setProcessName(process.getProcessName());
+                                setPC(process.getPC());
+                                setMAR(process.getMAR());
+                            } else {
+                                setRunningProcess("OS");
+                                setProcessName("");
+                                setPC(getClockManager().getClockCycles());
+                                setMAR(getClockManager().getClockCycles());
+                            }
+                        } finally {
+                            getReadyLock().release();
+                        }
+                    }
                     stepOneInstruction(getProcess());
                     setLastCycleRef(now);
                 }
@@ -318,19 +356,19 @@ public class CPU {
         try {
             getReadyLock().acquire();
             if (!readyQueue.isEmpty()) {
-                Process p = (Process) getReadyQueue().dequeue();
-                setProcess(p);
-                setProcessName(p.getProcessName());
-                setRunningProcess("P" + p.getID());
-                p.setStatus(Process.Status.Running);
+                Process process = (Process) getReadyQueue().dequeue();
+                setProcess(process);
+                setProcessName(process.getProcessName());
+                setRunningProcess("P" + process.getID());
+                process.setStatus(Process.Status.Running);
                 // sincroniza contadores visibles
-                setPC(p.getPC());
-                setMAR(p.getMAR());
+                setPC(process.getPC());
+                setMAR(process.getMAR());
             } else {
                 setRunningProcess("OS");
                 setProcessName("");
-                setPC((Integer) 0);
-                setMAR((Integer) 0);
+                setPC(getClockManager().getClockCycles());
+                setMAR(getClockManager().getClockCycles());
             }
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
@@ -339,24 +377,24 @@ public class CPU {
         }
     }
 
-    private void stepOneInstruction(Process p) {
-        p.setPC(p.getPC() + 1);
-        p.setMAR(p.getMAR() + 1);
-        p.setRemainingBurstTime(p.getRemainingBurstTime() - 1);
+    private void stepOneInstruction(Process process) {
+        process.setPC(process.getPC() + 1);
+        process.setMAR(process.getMAR() + 1);
+        process.setRemainingBurstTime(process.getRemainingBurstTime() - 1);
 
-        setPC(p.getPC());
-        setMAR(p.getMAR());
+        setPC(process.getPC());
+        setMAR(process.getMAR());
 
         // ¿E/S?
-        if (p.isIObound()
-            && p.getCyclesToExcept() != null
-            && p.getCyclesToCompleteRequest() != null
-            && p.getPC().equals(p.getCyclesToExcept())) {
+        if (process.isIObound()
+            && process.getCyclesToExcept() != null
+            && process.getCyclesToCompleteRequest() != null
+            && process.getPC().equals(process.getCyclesToExcept())) {
 
-            p.setStatus(Process.Status.Blocked);
+            process.setStatus(Process.Status.Blocked);
             try {
                 getBlockedLock().acquire();
-                getBlockedQueue().enqueue(p);
+                getBlockedQueue().enqueue(process);
             } catch (InterruptedException ie) {
                 Thread.currentThread().interrupt();
                 return;
@@ -364,8 +402,8 @@ public class CPU {
                 getBlockedLock().release();
             }
 
-            int wakeCycle = getClockManager().getClockCycles() + p.getCyclesToCompleteRequest();
-            scheduleUnblock(p, wakeCycle);
+            int wakeCycle = getClockManager().getClockCycles() + process.getCyclesToCompleteRequest();
+            scheduleUnblock(process, wakeCycle);
 
             // libera CPU
             setProcess(null);
@@ -375,11 +413,11 @@ public class CPU {
         }
 
         // ¿Terminó?
-        if (p.getRemainingBurstTime() != null && p.getRemainingBurstTime() <= 0) {
-            p.setStatus(Process.Status.Exit);
+        if (process.getRemainingBurstTime() != null && process.getRemainingBurstTime() <= 0) {
+            process.setStatus(Process.Status.Exit);
             try {
                 getExitLock().acquire();
-                getExitList().add(p);
+                getExitList().add(process);
             } catch (InterruptedException ie) {
                 Thread.currentThread().interrupt();
                 return;
@@ -393,7 +431,7 @@ public class CPU {
     }
 
     // Hilo que simula espera de E/S y reencola a Ready
-    private void scheduleUnblock(Process p, int wakeCycle) {
+    private void scheduleUnblock(Process process, int wakeCycle) {
         new Thread(() -> {
             try {
                 getIoDevice().acquire(); // ocupa dispositivo
@@ -404,16 +442,16 @@ public class CPU {
 
                 try {
                     getBlockedLock().acquire();
-                    getBlockedQueue().dequeueById(p.getID());
+                    getBlockedQueue().dequeueById(process.getID());
                 } finally {
                     getBlockedLock().release();
                 }
 
-                p.setStatus(Process.Status.Ready);
+                process.setStatus(Process.Status.Ready);
 
                 try {
                     getReadyLock().acquire();
-                    getReadyQueue().enqueue(p);
+                    getReadyQueue().enqueue(process);
                 } finally {
                     getReadyLock().release();
                 }
@@ -423,6 +461,6 @@ public class CPU {
             } finally {
                 getIoDevice().release(); // libera dispositivo
             }
-        }, "IO-Wait-P" + p.getID()).start();
+        }, "IO-Wait-P" + process.getID()).start();
     }
 }

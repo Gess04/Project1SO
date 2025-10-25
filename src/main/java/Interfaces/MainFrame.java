@@ -17,7 +17,6 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.Semaphore;
-import Interfaces.HelperFunctions;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -58,8 +57,8 @@ public class MainFrame extends javax.swing.JFrame {
     // --- Simulación de dispositivo de E/S ---
     // (solo un proceso puede usar el dispositivo a la vez)
     private final Semaphore ioDevice = new Semaphore(1, true);
-    
 
+    
     public MainFrame() {
      
         super("Simulador - NetBeans / Swing Example");
@@ -192,11 +191,11 @@ public class MainFrame extends javax.swing.JFrame {
         reorderTimer.start();
         
         // CPU
-        CPU cpu = new CPU(clockManager, readyQueue, blockedQueue, exitList,
+        cpu = new CPU(clockManager, readyQueue, blockedQueue, exitList,
                 readyLock, blockedLock, exitLock, ioDevice);
         cpu.start();
-
         
+
         // Panel “Ciclo de reloj”
         jPanel17.setLayout(new GridBagLayout());
         jPanel17.setPreferredSize(new Dimension(200, 120)); // tamaño fijo
@@ -209,18 +208,15 @@ public class MainFrame extends javax.swing.JFrame {
         clockValue.setHorizontalAlignment(SwingConstants.CENTER);
         clockValue.setVerticalAlignment(SwingConstants.CENTER);
         jPanel17.add(clockValue);
-        Timer uiClockTimer = new Timer(200, e -> clockValue.setText(String.valueOf(clockManager.getClockCycles())));
+        
+        
+        Timer uiClockTimer = new Timer(200, e -> {
+            clockValue.setText(String.valueOf(clockManager.getClockCycles()));
+            updateCpuPanel();
+                    });
         uiClockTimer.start();
         
-        Timer uiListsTimer = new Timer(300, e -> {
-            scheduler.dispatch(cpu);
-            refreshReadyPanel();
-            refreshBlockedPanel();
-            refreshFinishedPanel();
-        });
-        uiListsTimer.start();
-        
-        
+          
         types1.addActionListener(evt -> {
             boolean isIO = IO_BOUND.equals(types1.getSelectedItem());
             cycles3.setEnabled(isIO);
@@ -232,7 +228,7 @@ public class MainFrame extends javax.swing.JFrame {
     }
     
     static class ProcessCard extends JPanel {
-        public ProcessCard(Process p, String estado) {
+        public ProcessCard(Process process, String estado) {
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
             Dimension fixed = new Dimension(160, 120);
@@ -245,17 +241,17 @@ public class MainFrame extends javax.swing.JFrame {
             setAlignmentX(Component.LEFT_ALIGNMENT);
             setAlignmentY(Component.TOP_ALIGNMENT);
 
-            JLabel title = new JLabel(p.getProcessName());
+            JLabel title = new JLabel(process.getProcessName());
             title.setAlignmentX(Component.CENTER_ALIGNMENT);
             title.setFont(title.getFont().deriveFont(Font.BOLD, 12f));
             add(title);
 
             add(Box.createVerticalStrut(6));
-            add(new JLabel("ID: " + p.getID()));
-            add(new JLabel("PC: " + p.getPC()));
-            add(new JLabel("MAR: " + p.getMAR()));
+            add(new JLabel("ID: " + process.getID()));
+            add(new JLabel("PC: " + process.getPC()));
+            add(new JLabel("MAR: " + process.getMAR()));
             add(new JLabel("Status: " + estado));
-            add(new JLabel("Tipo: " + (p.isIObound() ? "I/O bound" : "CPU bound")));
+            add(new JLabel("Tipo: " + (process.isIObound() ? "I/O bound" : "CPU bound")));
         }
     }
     
@@ -318,6 +314,12 @@ public class MainFrame extends javax.swing.JFrame {
         cpuMARLabel = new javax.swing.JLabel();
         cpuStaLabel = new javax.swing.JLabel();
         cpuTipoLabel = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
+        jLabel11 = new javax.swing.JLabel();
+        jLabel12 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
         jScrollPane4 = new javax.swing.JScrollPane();
         jScrollPane5 = new javax.swing.JScrollPane();
@@ -355,7 +357,7 @@ public class MainFrame extends javax.swing.JFrame {
 
         jLabel7.setText("Tipo:");
 
-        jLabel8.setText("Ciclos para generar excepciones");
+        jLabel8.setText("Ciclos generar excepción");
 
         createProcess.setText("Crear Proceso");
         createProcess.addActionListener(new java.awt.event.ActionListener() {
@@ -364,45 +366,42 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
 
-        completeExceptLabel.setText("jLabel1");
+        completeExceptLabel.setText("Ciclos satisfacer excep.");
 
         javax.swing.GroupLayout jPanel15Layout = new javax.swing.GroupLayout(jPanel15);
         jPanel15.setLayout(jPanel15Layout);
         jPanel15Layout.setHorizontalGroup(
             jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel15Layout.createSequentialGroup()
-                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel15Layout.createSequentialGroup()
-                        .addGap(15, 15, 15)
-                        .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel15Layout.createSequentialGroup()
-                        .addGap(34, 34, 34)
-                        .addComponent(completeExceptLabel)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(types1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cycles3, javax.swing.GroupLayout.DEFAULT_SIZE, 216, Short.MAX_VALUE)
-                    .addComponent(instructionsCount1)
-                    .addComponent(cycles4))
-                .addGap(126, 126, 126))
-            .addGroup(jPanel15Layout.createSequentialGroup()
-                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel15Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel15Layout.createSequentialGroup()
-                        .addGap(3, 3, 3)
-                        .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(jPanel15Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(nameProccess1, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(172, 172, 172))
             .addGroup(jPanel15Layout.createSequentialGroup()
                 .addGap(93, 93, 93)
                 .addComponent(createProcess, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel15Layout.createSequentialGroup()
+                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel15Layout.createSequentialGroup()
+                        .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(jPanel15Layout.createSequentialGroup()
+                                .addComponent(completeExceptLabel)
+                                .addGap(0, 0, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
+                    .addGroup(jPanel15Layout.createSequentialGroup()
+                        .addGap(3, 3, 3)
+                        .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(65, 65, 65))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel15Layout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)))
+                .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(nameProccess1)
+                    .addComponent(types1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cycles3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 216, Short.MAX_VALUE)
+                    .addComponent(instructionsCount1, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(cycles4, javax.swing.GroupLayout.Alignment.LEADING))
+                .addGap(126, 126, 126))
         );
         jPanel15Layout.setVerticalGroup(
             jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -457,18 +456,19 @@ public class MainFrame extends javax.swing.JFrame {
         jPanel16Layout.setHorizontalGroup(
             jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel16Layout.createSequentialGroup()
-                .addGap(65, 65, 65)
-                .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel16Layout.createSequentialGroup()
-                        .addGap(15, 15, 15)
-                        .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(65, 65, 65)
+                        .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jSpinner2)
                             .addGroup(jPanel16Layout.createSequentialGroup()
-                                .addGap(6, 6, 6)
+                                .addGap(21, 21, 21)
                                 .addComponent(planningAlgorithm, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addComponent(jSpinner2))
+                    .addGroup(jPanel16Layout.createSequentialGroup()
+                        .addGap(73, 73, 73)
+                        .addComponent(jLabel1)))
                 .addContainerGap(69, Short.MAX_VALUE))
         );
         jPanel16Layout.setVerticalGroup(
@@ -559,6 +559,18 @@ public class MainFrame extends javax.swing.JFrame {
 
         cpuLabel6.setText("Tipo:");
 
+        jLabel3.setText("jLabel3");
+
+        jLabel4.setText("jLabel4");
+
+        jLabel9.setText("jLabel9");
+
+        jLabel10.setText("jLabel10");
+
+        jLabel11.setText("jLabel11");
+
+        jLabel12.setText("jLabel12");
+
         javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
         jPanel11.setLayout(jPanel11Layout);
         jPanel11Layout.setHorizontalGroup(
@@ -568,27 +580,39 @@ public class MainFrame extends javax.swing.JFrame {
                 .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel11Layout.createSequentialGroup()
                         .addComponent(cpuLabel6)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 82, Short.MAX_VALUE)
-                        .addComponent(cpuTipoLabel))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 43, Short.MAX_VALUE)
+                        .addComponent(cpuTipoLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel12))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel11Layout.createSequentialGroup()
                         .addComponent(cpuLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(cpuStaLabel))
+                        .addComponent(cpuStaLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel11))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel11Layout.createSequentialGroup()
                         .addComponent(cpuLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(cpuMARLabel))
+                        .addComponent(cpuMARLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel10))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel11Layout.createSequentialGroup()
                         .addComponent(cpuLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel9)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cpuPCLabel))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel11Layout.createSequentialGroup()
                         .addComponent(cpuLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cpuIDLabel))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel11Layout.createSequentialGroup()
                         .addComponent(cpuLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cpuPLabel)))
                 .addGap(62, 62, 62))
         );
@@ -598,27 +622,33 @@ public class MainFrame extends javax.swing.JFrame {
                 .addGap(20, 20, 20)
                 .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cpuLabel1)
-                    .addComponent(cpuPLabel))
+                    .addComponent(cpuPLabel)
+                    .addComponent(jLabel3))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cpuLabel2)
-                    .addComponent(cpuIDLabel))
+                    .addComponent(cpuIDLabel)
+                    .addComponent(jLabel4))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cpuLabel3)
-                    .addComponent(cpuPCLabel))
+                    .addComponent(cpuPCLabel)
+                    .addComponent(jLabel9))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cpuLabel4)
-                    .addComponent(cpuMARLabel))
+                    .addComponent(cpuMARLabel)
+                    .addComponent(jLabel10))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cpuLabel5)
-                    .addComponent(cpuStaLabel))
+                    .addComponent(cpuStaLabel)
+                    .addComponent(jLabel11))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cpuLabel6)
-                    .addComponent(cpuTipoLabel))
+                    .addComponent(cpuTipoLabel)
+                    .addComponent(jLabel12))
                 .addContainerGap(16, Short.MAX_VALUE))
         );
 
@@ -639,9 +669,6 @@ public class MainFrame extends javax.swing.JFrame {
             .addGroup(jPanel14Layout.createSequentialGroup()
                 .addGroup(jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel14Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jPanel15, javax.swing.GroupLayout.PREFERRED_SIZE, 401, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel14Layout.createSequentialGroup()
                         .addGap(113, 113, 113)
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel14Layout.createSequentialGroup()
@@ -649,10 +676,13 @@ public class MainFrame extends javax.swing.JFrame {
                         .addComponent(jPanel16, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel14Layout.createSequentialGroup()
                         .addGap(139, 139, 139)
-                        .addComponent(jPanel17, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(85, 85, 85)
+                        .addComponent(jPanel17, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel14Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jPanel15, javax.swing.GroupLayout.PREFERRED_SIZE, 428, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(82, 82, 82)
                 .addGroup(jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 365, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 341, Short.MAX_VALUE)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addGroup(jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -882,6 +912,7 @@ public class MainFrame extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
         initalizeChart1();
+        // CODIGO PARA LA CREACION DE 10 PROCESOS
         for (int i=1; i<11; i++) {
             int pId = i;
             String name = "Proceso " + Integer.toString(i);
@@ -920,11 +951,13 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
 
-        updateSchedulerAlgorithm();
+        String selected = (String) planningAlgorithm.getSelectedItem();
+        HelperFunctions help = new HelperFunctions();
+        Scheduler sched = help.updateSchedulerAlgorithm(selected, readyQueue, clockManager);
         try {
-            readyLock.acquire();              // BLOQUEA la cola mientras reordenas
-            if (scheduler != null) {
-                scheduler.reorder();          // reordena TODOS los que ya están en cola
+            readyLock.acquire();              // BLOQUEA la cola mientras reordena
+            if (sched != null) {
+                sched.reorder();          // reordena TODOS los que ya están en cola
             }
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
@@ -932,6 +965,8 @@ public class MainFrame extends javax.swing.JFrame {
             readyLock.release();              // LIBERA
         }
         refreshReadyPanel();
+        int algorithm = (Integer) jSpinner2.getValue();
+        clockManager.updateInstructionDuration(algorithm);
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void planningAlgorithmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_planningAlgorithmActionPerformed
@@ -997,6 +1032,7 @@ public class MainFrame extends javax.swing.JFrame {
             arrivalTime,
             0.0);
         process.start();
+        process.saveToCSV(clockManager.getInstructionDuration());
 
         try {
             readyLock.acquire();
@@ -1015,9 +1051,6 @@ public class MainFrame extends javax.swing.JFrame {
         cycles4.setValue(1);
         cycles3.setEnabled(false);
         cycles4.setEnabled(false);
-
-        Process newProcess = new Process(name,instructionsCounter,exceptionCycle);
-        newProcess.saveToCSV();
     }//GEN-LAST:event_createProcessActionPerformed
 
     private void types1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_types1ActionPerformed
@@ -1106,51 +1139,6 @@ public class MainFrame extends javax.swing.JFrame {
         }
     }
     
-    private void updateSchedulerAlgorithm() {
-    String selected = (String) planningAlgorithm.getSelectedItem();
-    int algorithm = (Integer) jSpinner2.getValue();
-
-    if (selected == null) return;
-    
-    if (algorithm <= 0) {
-        JOptionPane.showMessageDialog(this, "⚠️ Falta configurar los campos: el valor del parámetro debe ser mayor que 0.");
-        System.out.println("Error: valor de parámetro inválido (" + algorithm + ")");
-        return;
-    }
-
-    switch (selected) {
-        case "FCFS":
-            scheduler = new Scheduler(new FCFS(readyQueue), readyQueue);
-            System.out.println("Algoritmo cambiado a FCFS");
-            JOptionPane.showMessageDialog(this, "✅ Configuración guardada exitosamente.");
-            break;
-
-        case "SPN":
-            scheduler = new Scheduler(new SPN(readyQueue), readyQueue);
-            System.out.println("Algoritmo cambiado a SPN");
-            JOptionPane.showMessageDialog(this, "✅ Configuración guardada exitosamente.");
-            break;
-            
-        case "SJF":
-            scheduler = new Scheduler(new SRT(readyQueue), readyQueue);
-            System.out.println("Algoritmo cambiado a SRT");
-            JOptionPane.showMessageDialog(this, "✅ Configuración guardada exitosamente.");
-            break;
-
-//        case "RR":
-//            scheduler = new Scheduler(new RoundRobin(readyQueue, 3), readyQueue); // quantum=3 ejemplo
-//            System.out.println("Algoritmo cambiado a Round Robin");
-//            break;
-            
-            
-
-        default:
-            System.out.println("Algoritmo no reconocido.");
-            JOptionPane.showMessageDialog(this, "❌ Error al guardar: ");
-            break;
-    }
-    
-}
     private JFreeChart chart1;
     DefaultPieDataset data = new DefaultPieDataset();
     public void initalizeChart1(){
@@ -1219,11 +1207,32 @@ public class MainFrame extends javax.swing.JFrame {
         repaint();
         
     }
+    
+    private void updateCpuPanel() {
+    Process process = cpu.getProcess(); // el proceso que la CPU está ejecutando o null
+
+    if (process == null) {
+        // Si no hay ningún proceso, mostrar SO
+        jLabel3.setText("OS");
+        jLabel4.setText("--");
+        int g = clockManager.getClockCycles();
+        jLabel9.setText(String.valueOf(g));  // PC = ciclos globales
+        jLabel10.setText(String.valueOf(g)); // MAR = ciclos globales
+        jLabel11.setText("--");
+        jLabel12.setText("--");
+    } else {
+        // Mostrar datos del proceso actual
+        jLabel3.setText(process.getProcessName());
+        jLabel4.setText(String.valueOf(process.getID()));
+        jLabel9.setText(String.valueOf(process.getPC()));
+        jLabel10.setText(String.valueOf(process.getMAR()));
+        jLabel11.setText(process.getStatus() != null ? process.getStatus().name() : "--");
+        jLabel12.setText(process.isIObound() ? "I/O bound" : "CPU bound");
+    }
+}
 
     
         
-        
-    
     /**
      * @param args the command line arguments
      */
@@ -1288,11 +1297,17 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel11;
