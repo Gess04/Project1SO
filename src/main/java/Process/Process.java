@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -23,7 +22,7 @@ public class Process extends Thread {
     public Process(String name, String instructionsCounter, String exceptionCycle) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-    
+   
     public enum Status {
         Running,
         Blocked,
@@ -209,18 +208,18 @@ public class Process extends Thread {
         return "Process{" + "processName=" + processName + ", instructionCount=" + instructionCount + '}';
     }
     
-    public void saveToCSV() {
-    File file =new File("ExecutionAlgorithm.csv");
-    System.out.println("Guardando CSV en:" + file.getAbsolutePath());
-    try (BufferedWriter bw = new BufferedWriter(new FileWriter("C:\\MiProyecto\\ExecutionAlgorithm.csv"))) {
-        bw.write("CPUs,InstructionDuration,Algorithm");
-        bw.newLine();
-        bw.write(this.processName+ "," + this.instructionCount+ "," + this.cyclesToExcept);
-        bw.newLine();
-    } catch (IOException e) {
-        e.printStackTrace();
+    public void saveToCSV(double instDur) {
+        File file = new File("ExecutionAlgorithm.csv");
+        System.out.println("Guardando CSV en:" + file.getAbsolutePath());
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("C:\\MiProyecto\\ExecutionAlgorithm.csv"))) {
+            bw.write("Process,InstructionDuration,Algorithm");
+            bw.newLine();
+            bw.write(this.processName + "," + this.instructionCount + "," + this.cyclesToExcept);
+            bw.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-}
     
      public static Settings loadFromCSV() {
         try (BufferedReader br = new BufferedReader(new FileReader("ExecutionAlgorithm.csv"))) {
