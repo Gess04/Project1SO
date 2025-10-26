@@ -67,6 +67,12 @@ public class SPN implements SchedulingAlgorithm {
     
     @Override
     public void dispatch(CPU cpu) {
-        
+        // do nothing
     }
+    
+    @Override
+    public void onTick(CPU cpu) {
+        // do nothing
+    }
+    
 }

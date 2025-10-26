@@ -7,6 +7,7 @@ package Interfaces;
 import Scheduler.*;
 import DS.Queue;
 import Clock.ClockManager;
+import java.util.concurrent.Semaphore;
 import javax.swing.JOptionPane;
 
 /**
@@ -22,13 +23,9 @@ public class HelperFunctions {
      * @param clockManager
      * @return Aplica el algoritmo de planificación seleccionado
      */
-    public Scheduler updateSchedulerAlgorithm(String planningAlgorithm, Queue readyQueue, ClockManager clockManager) {
+    public Scheduler updateSchedulerAlgorithm(String planningAlgorithm, Queue readyQueue, ClockManager clockManager, Semaphore readyLock) {
 //        String selected = (String) planningAlgorithm.getSelectedItem();
         String selected = planningAlgorithm; 
-
-        if (selected == null) {
-            return new Scheduler(new FCFS(readyQueue), readyQueue);
-        }
 
         switch (selected) {
             case "FCFS":
@@ -50,11 +47,12 @@ public class HelperFunctions {
                 System.out.println("Algoritmo cambiado a HRRN");
                 JOptionPane.showMessageDialog(null, "✅ Configuración guardada exitosamente.");
                 return new Scheduler(new HRRN(readyQueue, clockManager), readyQueue);
-
-//        case "RR":
-//            scheduler = new Scheduler(new RoundRobin(readyQueue, 3), readyQueue); // quantum=3 ejemplo
-//            System.out.println("Algoritmo cambiado a Round Robin");
-//            break;
+               
+            case "Round robin":
+                System.out.println("Algoritmo cambiado a Round Robin");
+                JOptionPane.showMessageDialog(null, "✅ Configuración guardada exitosamente.");
+                return new Scheduler(new RoundRobin(readyQueue, readyLock, 5), readyQueue);
+            
             default:
                 System.out.println("Algoritmo no reconocido.");
                 break;

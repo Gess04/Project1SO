@@ -26,15 +26,24 @@ public class Scheduler {
         return readyQueue;
     }
 
-    // Reorder the queue based on the selected scheduling algorithm
     public void reorder() {
-        algorithm.reorder();  // Reorder based on the specific algorithm
+        algorithm.reorder();
     }
 
-    // Dispatch the process to the CPU for execution
     public void dispatch(CPU cpu) {
-        reorder();  // Reorder the queue before dispatching
-        Process process = readyQueue.dequeue();  // Get the next process
-//        cpu.run(process);  // Let the CPU execute the process
+        reorder();
+        Process process = readyQueue.dequeue();
+    }
+    
+    public void onTick(CPU cpu) {
+        if (algorithm == null) return;
+
+        algorithm.onTick(cpu);
+
+        algorithm.reorder();
+
+        if (cpu.getProcess() == null) {
+            algorithm.dispatch(cpu);
+        }
     }
 }

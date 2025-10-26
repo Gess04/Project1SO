@@ -33,22 +33,20 @@ public class HRRN implements SchedulingAlgorithm {
         for (int i = 0; i < arr.length; i++) {
             Process p = arr[i];
 
-            // Service time (S): usamos remainingBurstTime; fallback a instructionCount; mínimo 1
             int service = (p.getRemainingBurstTime() != null) ? p.getRemainingBurstTime()
                          : (p.getInstructionCount() != null ? p.getInstructionCount() : 1);
             if (service <= 0) service = 1;
 
-            // Waiting time (W): ahora - arrivalTime  (para procesos en readyQueue)
             int arrival = p.getArrivaltime();
             int waiting = now - arrival;
             if (waiting < 0) waiting = 0;
 
             double rr = (waiting + service) / (double) service;
             ratio[i] = rr;
-            p.setResponseRatio(rr); // opcional: guardarlo en el modelo
+            p.setResponseRatio(rr);
         }
 
-        // Selection sort por ratio DESC (mayor primero). Empates: menor arrivalTime primero.
+        // Selection sort por ratio. Empates: menor arrivalTime primero.
         for (int i = 0; i < arr.length - 1; i++) {
             int bestPos = i;
             double bestRR = ratio[i];
@@ -74,19 +72,15 @@ public class HRRN implements SchedulingAlgorithm {
             }
 
             if (bestPos != i) {
-                // swap en arr
                 Process tmpP = arr[i];
                 arr[i] = arr[bestPos];
                 arr[bestPos] = tmpP;
-
-                // swap en ratio paralelo
                 double tmpR = ratio[i];
                 ratio[i] = ratio[bestPos];
                 ratio[bestPos] = tmpR;
             }
         }
 
-        // Volcar el nuevo orden a la cola
         readyQueue.clear();
         for (int i = 0; i < arr.length; i++) {
             readyQueue.enqueue(arr[i]);
@@ -96,5 +90,10 @@ public class HRRN implements SchedulingAlgorithm {
     @Override
     public void dispatch(CPU cpu) {
         // do nothing
+    }
+    
+    @Override
+    public void onTick(CPU cpu) {
+        
     }
 }
