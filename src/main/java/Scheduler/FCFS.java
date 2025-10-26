@@ -28,13 +28,41 @@ public class FCFS implements SchedulingAlgorithm {
         this.readyQueue = readyQueue;
     }
     
+    
+    private int compare(Process a, Process b) {
+        int ta = a.getArrivaltime();
+        int tb = b.getArrivaltime();
+        if (ta != tb) return ta - tb;
+        return a.getID().compareTo(b.getID());
+    }
+    
     @Override
     public void reorder() {
-        // do nothing
+        Process[] arr = readyQueue.getAllElements();
+        if (arr == null || arr.length <= 1) return;
+
+        // insertion sort por (arrivalTime, ID)
+        for (int i = 1; i < arr.length; i++) {
+            Process key = arr[i];
+            int j = i - 1;
+            while (j >= 0 && compare(arr[j], key) > 0) {
+                arr[j + 1] = arr[j];
+                j--;
+            }
+            arr[j + 1] = key;
+        }
+
+        readyQueue.clear();
+        for (int k = 0; k < arr.length; k++) readyQueue.enqueue(arr[k]); 
     }
     
     @Override
     public void dispatch(CPU cpu) {
+        // do nothing
+    }
+    
+    @Override
+    public void onTick(CPU cpu) {
         // do nothing
     }
     

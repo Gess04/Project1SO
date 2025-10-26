@@ -57,7 +57,7 @@ public class MainFrame extends javax.swing.JFrame {
     // --- Simulación de dispositivo de E/S ---
     // (solo un proceso puede usar el dispositivo a la vez)
     private final Semaphore ioDevice = new Semaphore(1, true);
-
+    
     
     public MainFrame() {
      
@@ -165,30 +165,41 @@ public class MainFrame extends javax.swing.JFrame {
         finishedContainer.add(finishedScroll, BorderLayout.CENTER);
         center.add(finishedContainer);  
           
-        
+
+        scheduler = new Scheduler(new FCFS(readyQueue), readyQueue);
         initComponents();
 
         
         jLabel8.setText("Ciclos para generar excepción");
         completeExceptLabel.setText("Ciclos para satisfacer");
         
-        // Refresca paneles cada 200 ms para ver Ready/Blocked/Exit y PC/MAR en vivo
-        new javax.swing.Timer(200, e -> {
+        // Refresca paneles cada 150 ms para ver Ready/Blocked/Exit y PC/MAR en vivo
+        new javax.swing.Timer(150, e -> {
             refreshReadyPanel();
             refreshBlockedPanel();
             refreshFinishedPanel();
         }).start();
         
         // Reloj Global
-        clockManager = new ClockManager(1);
+        settings = Settings.loadFromCSV();
+        clockManager = settings.getClockManager();
        
         // Timer que reordena la readyQueue periódicamente (no bloquea al CPU)
         Timer reorderTimer = new Timer(120, e -> {
             scheduler.dispatch(cpu);
             scheduler.reorder();
-            refreshReadyPanel(); // para que veas el reorden en la UI
+            refreshReadyPanel();
         });
         reorderTimer.start();
+        new javax.swing.Timer(120, e -> {
+            if (scheduler != null && cpu != null) {
+                scheduler.onTick(cpu);   // SRT decide si preempta
+            }
+            refreshReadyPanel();
+            refreshBlockedPanel();
+            refreshFinishedPanel();
+            updateCpuPanel();
+        }).start();
         
         // CPU
         cpu = new CPU(clockManager, readyQueue, blockedQueue, exitList,
@@ -259,10 +270,6 @@ public class MainFrame extends javax.swing.JFrame {
      * Creates new form MainFrame
      */
     
-        
-       
-    
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -953,11 +960,11 @@ public class MainFrame extends javax.swing.JFrame {
 
         String selected = (String) planningAlgorithm.getSelectedItem();
         HelperFunctions help = new HelperFunctions();
-        Scheduler sched = help.updateSchedulerAlgorithm(selected, readyQueue, clockManager);
+        scheduler = help.updateSchedulerAlgorithm(selected, readyQueue, clockManager, readyLock);
         try {
             readyLock.acquire();              // BLOQUEA la cola mientras reordena
-            if (sched != null) {
-                sched.reorder();          // reordena TODOS los que ya están en cola
+            if (scheduler != null) {
+                scheduler.reorder();          // reordena TODOS los que ya están en cola
             }
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
@@ -966,7 +973,12 @@ public class MainFrame extends javax.swing.JFrame {
         }
         refreshReadyPanel();
         int algorithm = (Integer) jSpinner2.getValue();
-        clockManager.updateInstructionDuration(algorithm);
+        if (algorithm != 0) {
+            clockManager.updateInstructionDuration(algorithm);
+        }
+        settings.setInstructionDuration(algorithm);
+        settings.setPlanningAlgorithm(selected);
+        settings.saveToCSV();
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void planningAlgorithmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_planningAlgorithmActionPerformed
@@ -1032,7 +1044,6 @@ public class MainFrame extends javax.swing.JFrame {
             arrivalTime,
             0.0);
         process.start();
-        process.saveToCSV(clockManager.getInstructionDuration());
 
         try {
             readyLock.acquire();

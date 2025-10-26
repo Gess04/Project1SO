@@ -37,9 +37,6 @@ public class CPU {
     private Thread worker;
     private int lastCycleRef = 0;
     
-    private volatile boolean preemptRequested = false;
-    private volatile Process preemptCandidate = null;
-    
     public CPU(ClockManager clockManager,
                Queue readyQueue, Queue blockedQueue, ProcessList exitList,
                Semaphore readyLock, Semaphore blockedLock, Semaphore exitLock,
@@ -293,64 +290,6 @@ public class CPU {
         if (getWorker() != null) getWorker().interrupt();
     }
     
-    public void requestPreemption(Process candidate) {
-        this.preemptCandidate = candidate;
-        this.preemptRequested = true;
-    }
-    
-    private void run() {
-        setLastCycleRef(getClockManager().getClockCycles());
-        while (isRunning()) {
-            try {
-                int now = getClockManager().getClockCycles();
-
-                if (getProcess() == null) {
-                    dispatchFromReady();
-                    setLastCycleRef(now);
-                }
-
-                if (getProcess() != null && now > getLastCycleRef()) {
-                    if (preemptRequested) {
-                        preemptRequested = false;
-                        try {
-                            getReadyLock().acquire();
-                            // Devuelve el proceso actual a la cola si aún no terminó
-                            if (process != null) {
-                                process.setStatus(Process.Status.Ready);
-                                readyQueue.enqueue(process);
-                            }
-
-                            // Carga el nuevo proceso corto o prioritario
-                            process = preemptCandidate;
-                            preemptCandidate = null;
-
-                            if (process != null) {
-                                process.setStatus(Process.Status.Running);
-                                setRunningProcess("P" + process.getID());
-                                setProcessName(process.getProcessName());
-                                setPC(process.getPC());
-                                setMAR(process.getMAR());
-                            } else {
-                                setRunningProcess("OS");
-                                setProcessName("");
-                                setPC(getClockManager().getClockCycles());
-                                setMAR(getClockManager().getClockCycles());
-                            }
-                        } finally {
-                            getReadyLock().release();
-                        }
-                    }
-                    stepOneInstruction(getProcess());
-                    setLastCycleRef(now);
-                }
-
-                Thread.sleep(5);
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
-                break;
-            }
-        }
-    }
 
     private void dispatchFromReady() {
         try {
@@ -429,6 +368,30 @@ public class CPU {
             setProcessName("");
         }
     }
+    
+    private void run() {
+        setLastCycleRef(getClockManager().getClockCycles());
+        while (isRunning()) {
+            try {
+                int now = getClockManager().getClockCycles();
+
+                if (getProcess() == null) {
+                    dispatchFromReady();
+                    setLastCycleRef(now);
+                }
+
+                if (getProcess() != null && now > getLastCycleRef()) {
+                    stepOneInstruction(getProcess());
+                    setLastCycleRef(now);
+                }
+
+                Thread.sleep(5);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+    }
 
     // Hilo que simula espera de E/S y reencola a Ready
     private void scheduleUnblock(Process process, int wakeCycle) {
@@ -462,5 +425,31 @@ public class CPU {
                 getIoDevice().release(); // libera dispositivo
             }
         }, "IO-Wait-P" + process.getID()).start();
+    }
+    
+    // Llamado por el Scheduler (SRT) cuando detecta que hay uno más corto en ready.
+    public void preemptRunningToReady() {
+        Process cur = getProcess();
+        if (cur == null) {
+            return;
+        }
+
+        // Devuelve el proceso a Ready de forma segura
+        try {
+            getReadyLock().acquire();
+            cur.setStatus(Process.Status.Ready);
+            getReadyQueue().enqueue(cur);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+        } finally {
+            getReadyLock().release();
+        }
+
+        // Libera la CPU: el run() hará dispatch en el siguiente tick del reloj
+        setProcess(null);
+        setRunningProcess("OS");
+        setProcessName("");
+        setPC(getClockManager().getClockCycles());
+        setMAR(getClockManager().getClockCycles());
     }
 }

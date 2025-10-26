@@ -41,7 +41,7 @@ public class Process extends Thread {
     private Status status;
     private Integer PC;
     private Integer MAR;
-    private Integer priority;
+    private Integer prior;
     private Semaphore mutex;
     private int arrivaltime;
     private double responseRatio;
@@ -58,7 +58,7 @@ public class Process extends Thread {
         this.status = Status.Ready;
         this.PC = 0;
         this.MAR = 0;
-        this.priority = priority;
+        this.prior = priority;
         this.mutex = mutex;
         this.arrivaltime = arrivaltime;
         this.responseRatio = 0.0;
@@ -188,6 +188,14 @@ public class Process extends Thread {
     public void setResponseRatio(double responseRatio) {
         this.responseRatio = responseRatio;
     }
+
+    public Integer getPrior() {
+        return prior;
+    }
+
+    public void setPrior(Integer prior) {
+        this.prior = prior;
+    }
     
     public void printProcessDetails() {
         System.out.println("Process ID:" + ID);
@@ -208,37 +216,5 @@ public class Process extends Thread {
         return "Process{" + "processName=" + processName + ", instructionCount=" + instructionCount + '}';
     }
     
-    public void saveToCSV(double instDur) {
-        File file = new File("ExecutionAlgorithm.csv");
-        System.out.println("Guardando CSV en:" + file.getAbsolutePath());
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter("C:\\MiProyecto\\ExecutionAlgorithm.csv"))) {
-            bw.write("Process,InstructionDuration,Algorithm");
-            bw.newLine();
-            bw.write(this.processName + "," + this.instructionCount + "," + this.cyclesToExcept);
-            bw.newLine();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    
-     public static Settings loadFromCSV() {
-        try (BufferedReader br = new BufferedReader(new FileReader("ExecutionAlgorithm.csv"))) {
-            br.readLine(); // saltar encabezado
-            String line = br.readLine();
-            if (line != null) {
-                String[] values = line.split(",");
-                int cpus = Integer.parseInt(values[0]);
-                double duration = Double.parseDouble(values[1]);
-                String algorithm = values[2];
-                ClockManager clock = new ClockManager(duration);
-                
-                return new Settings(cpus, duration, algorithm,clock);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        ClockManager defaultClock = new ClockManager(1.0);
-        return new Settings(1, 1.0, "FCFS",defaultClock); // valores por defecto si no hay archivo
-    }
     
 }

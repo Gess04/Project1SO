@@ -10,7 +10,7 @@ import CPU.CPU;
  * @author Gabriel Flores
  */
 public interface SchedulingAlgorithm {
-    // Reordena la cola
     void reorder();
     void dispatch(CPU cpu);
+    void onTick(CPU cpu);
 }
