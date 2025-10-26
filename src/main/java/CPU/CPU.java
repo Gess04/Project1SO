@@ -6,6 +6,7 @@ package CPU;
 
 import Clock.ClockManager;
 import DS.ProcessList;
+import Interfaces.MainFrame;
 import DS.Queue;
 import Process.Process;
 import Scheduler.Scheduler;
@@ -22,7 +23,7 @@ public class CPU {
     private Integer MAR = 0;
     private String processName = "";
     private Process process = null;
-
+    private int totalFinishedProcess = 0;
     private ClockManager clockManager;
     private Queue readyQueue;
     private Queue blockedQueue;
