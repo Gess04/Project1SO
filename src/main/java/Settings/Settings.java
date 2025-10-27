@@ -96,9 +96,9 @@ public class Settings {
             String line = br.readLine();   // primera (y única) fila
             if (line != null) {
                 String[] values = line.split(",");
-                int cpus = Integer.parseInt(values[0].trim());
-                double duration = Double.parseDouble(values[1].trim());
-                String algorithm = values[2].trim();
+//                int cpus = Integer.parseInt(values[0].trim());
+                double duration = Double.parseDouble(values[0].trim());
+                String algorithm = values[1].trim();
 
                 ClockManager clock = new ClockManager(duration);
                 return new Settings(duration, algorithm, clock);
